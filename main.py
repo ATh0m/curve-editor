@@ -1,9 +1,10 @@
 import math
+import sys
 
-from PyQt5.QtCore import pyqtProperty, pyqtSignal, pyqtSlot, QRectF, Qt, QUrl
-from PyQt5.QtGui import QColor, QGuiApplication, QPainter, QPen, QBrush
-from PyQt5.QtQml import qmlRegisterType
-from PyQt5.QtQuick import QQuickPaintedItem, QQuickView
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import Qt
+
+from MainWindow import Ui_MainWindow
 
 def binomial(i, n):
     """Binomial coefficient"""
@@ -33,44 +34,48 @@ def bezier_curve_range(n, points):
         t = i / float(n - 1)
         yield bezier(t, points)
 
-class PieChart(QQuickPaintedItem):
+class PointsModel(QtCore.QAbstractListModel):
+    def __init__(self, *args, points=None, **kwargs):
+        super(PointsModel, self).__init__(*args, **kwargs)
+        self.points = points or []
 
-    chartCleared = pyqtSignal()  # 定义信号
+    def data(self, index, role):
+        if role == Qt.DisplayRole:
+            # See below for the data structure.
+            x, y = self.points[index.row()]
+            # Return the todo text only.
+            return f"({x}, {y})"
 
-    @pyqtProperty(str)
-    def name(self):
-        return self._name
+    def rowCount(self, index):
+        return len(self.points)
 
-    @name.setter
-    def name(self, name):
-        self._name = name
+class Canvas(QtWidgets.QLabel):
 
-    @pyqtProperty(QColor)
-    def color(self):
-        return self._color
+    def __init__(self, points):
+        super().__init__()
+        self.points = points
 
-    @color.setter
-    def color(self, color):
-        self._color = QColor(color)
+        pixmap = QtGui.QPixmap(800, 500)
+        pixmap.fill(Qt.white)
+        self.setPixmap(pixmap)
 
-    def __init__(self, parent=None):
-        super(PieChart, self).__init__(parent)
+        self.draw_something()
 
-        self._name = ''
-        self._color = QColor()
+    def mousePressEvent(self, ev: QtGui.QMouseEvent) -> None:
+        x, y = ev.x(), ev.y()
+        print(x, y)
 
-    def paint(self, painter):
-        # painter.setPen(QPen(self._color, 2))
-        painter.setRenderHints(QPainter.Antialiasing, True)
-        #
-        # rect = QRectF(0, 0, self.width(), self.height()).adjusted(1, 1, -1, -1)
-        # painter.drawPie(rect, 90 * 16, 290 * 16)
+        self.points.points.append((x, y))
+        self.points.layoutChanged.emit()
 
-        blackPen = QPen(Qt.black, 1, Qt.DashLine)
-        redPen = QPen(Qt.red, 1, Qt.DashLine)
-        bluePen = QPen(Qt.blue, 1, Qt.DashLine)
-        greenPen = QPen(Qt.green, 1, Qt.DashLine)
-        redBrush = QBrush(Qt.red)
+    def draw_something(self):
+        qp = QtGui.QPainter(self.pixmap())
+
+        blackPen = QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.DashLine)
+        redPen = QtGui.QPen(QtCore.Qt.red, 1, QtCore.Qt.DashLine)
+        bluePen = QtGui.QPen(QtCore.Qt.blue, 1, QtCore.Qt.DashLine)
+        greenPen = QtGui.QPen(QtCore.Qt.green, 1, QtCore.Qt.DashLine)
+        redBrush = QtGui.QBrush(QtCore.Qt.red)
 
         steps = 1000
         controlPoints = (
@@ -80,50 +85,69 @@ class PieChart(QQuickPaintedItem):
             (400, 320))
         oldPoint = controlPoints[0]
 
-        painter.setPen(redPen)
-        painter.setBrush(redBrush)
-        painter.drawEllipse(oldPoint[0] - 3, oldPoint[1] - 3, 6, 6)
+        qp.setPen(redPen)
+        qp.setBrush(redBrush)
+        qp.drawEllipse(oldPoint[0] - 3, oldPoint[1] - 3, 6, 6)
 
-        painter.drawText(oldPoint[0] + 5, oldPoint[1] - 3, '1')
+        qp.drawText(oldPoint[0] + 5, oldPoint[1] - 3, '1')
         for i, point in enumerate(controlPoints[1:]):
             i += 2
-            painter.setPen(blackPen)
-            painter.drawLine(oldPoint[0], oldPoint[1], point[0], point[1])
+            qp.setPen(blackPen)
+            qp.drawLine(oldPoint[0], oldPoint[1], point[0], point[1])
 
-            painter.setPen(redPen)
-            painter.drawEllipse(point[0] - 3, point[1] - 3, 6, 6)
+            qp.setPen(redPen)
+            qp.drawEllipse(point[0] - 3, point[1] - 3, 6, 6)
 
-            painter.drawText(point[0] + 5, point[1] - 3, '%d' % i)
+            qp.drawText(point[0] + 5, point[1] - 3, '%d' % i)
             oldPoint = point
 
-        painter.setPen(bluePen)
+        qp.setPen(bluePen)
         for point in bezier_curve_range(steps, controlPoints):
-            painter.drawLine(oldPoint[0], oldPoint[1], point[0], point[1])
+            qp.drawLine(oldPoint[0], oldPoint[1], point[0], point[1])
             oldPoint = point
 
+        qp.end()
 
 
-    @pyqtSlot()
-    def clearChart(self):
-        self.color = QColor(Qt.transparent)
-        self.update()
+data = [
+    ("Alice", [
+        ("Keys", []),
+        ("Purse", [
+            ("Cellphone", [])
+        ])
+    ]),
+    ("Bob", [
+        ("Wallet", [
+            ("Credit card", []),
+            ("Money", [])
+        ])
+    ])
+]
 
-        self.chartCleared.emit()  # 发射信号
+class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
+    def __init__(self, *args, obj=None, **kwargs):
+        super(MainWindow, self).__init__(*args, **kwargs)
+        self.setupUi(self)
+
+        self.model = PointsModel(points=[(100, 200)])
+        # self.listView.setModel(self.model)
+
+        self.model = QtGui.QStandardItemModel()
+        self.addItems(self.model, data)
+        self.treeView.setModel(self.model)
+
+        self.canvas = Canvas(self.model)
+        self.layout.addWidget(self.canvas)
+
+    def addItems(self, parent, elements):
+        for text, children in elements:
+            item = QtGui.QStandardItem(text)
+            parent.appendRow(item)
+            if children:
+                self.addItems(item, children)
 
 
-if __name__ == '__main__':
-    import os
-    import sys
-
-    app = QGuiApplication(sys.argv)
-
-    qmlRegisterType(PieChart, "Charts", 1, 0, "PieChart")
-
-    view = QQuickView()
-    view.setResizeMode(QQuickView.SizeRootObjectToView)
-    view.setSource(
-        QUrl.fromLocalFile(
-            os.path.join(os.path.dirname(__file__), 'src/qml/main.qml')))
-    view.show()
-
-    sys.exit(app.exec_())
+app = QtWidgets.QApplication(sys.argv)
+window = MainWindow()
+window.show()
+app.exec_()
