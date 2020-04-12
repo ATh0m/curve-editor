@@ -28,20 +28,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setupUi(self)
 
         self.model = CurvesModel()
-
-        root = self.model.rootItem
-        curve = CurveItem('Curve #1', parent=root)
-
-        for point in  [(50, 170), (150, 370), (250, 35), (400, 320)]:
-            point_item = PointItem(point, parent=curve)
-            curve.childItems.append(point_item)
-
-        root.childItems.append(curve)
-
         self.setup_treeview()
 
         self.canvas = Canvas(self.model)
         self.layout.addWidget(self.canvas)
+
+        self.sample_curve()
+        self.treeView.expandAll()
+
+    def sample_curve(self):
+        root = self.model.rootItem
+        curve = CurveItem('Curve #1', parent=root)
+
+        for point in [(50, 170), (150, 370), (250, 35), (400, 320)]:
+            point_item = PointItem(point, parent=curve)
+            curve.childItems.append(point_item)
+
+        root.childItems.append(curve)
+        self.model.layoutChanged.emit()
 
     def setup_treeview(self):
         self.treeView.setModel(self.model)

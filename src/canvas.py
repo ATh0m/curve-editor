@@ -39,16 +39,11 @@ class Canvas(QtWidgets.QLabel):
     def __init__(self, curvesModel):
         super().__init__()
         self.curvesModel = curvesModel
-        self.curvesModel.layoutChanged.connect(self.foo)
+        self.curvesModel.layoutChanged.connect(self.draw_something)
 
         pixmap = QtGui.QPixmap(800, 500)
         pixmap.fill(Qt.white)
         self.setPixmap(pixmap)
-
-        self.draw_something()
-
-    def foo(self):
-        print('Points updated')
 
     def mousePressEvent(self, ev: QtGui.QMouseEvent) -> None:
         x, y = ev.x(), ev.y()
@@ -64,7 +59,9 @@ class Canvas(QtWidgets.QLabel):
         # self.points.layoutChanged.emit()
 
     def draw_something(self):
+        print('Updated')
         qp = QtGui.QPainter(self.pixmap())
+        qp.eraseRect(self.pixmap().rect())
 
         blackPen = QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.DashLine)
         redPen = QtGui.QPen(QtCore.Qt.red, 1, QtCore.Qt.DashLine)
@@ -73,11 +70,15 @@ class Canvas(QtWidgets.QLabel):
         redBrush = QtGui.QBrush(QtCore.Qt.red)
 
         steps = 1000
-        controlPoints = (
-            (50, 170),
-            (150, 370),
-            (250, 35),
-            (400, 320))
+
+        curve: CurveItem = self.curvesModel.rootItem.childItems[0]
+        controlPoints = [point.itemData[0] for point in curve.childItems]
+
+        # controlPoints = (
+        #     (50, 170),
+        #     (150, 370),
+        #     (250, 35),
+        #     (400, 320))
         oldPoint = controlPoints[0]
 
         qp.setPen(redPen)
@@ -102,3 +103,4 @@ class Canvas(QtWidgets.QLabel):
             oldPoint = point
 
         qp.end()
+        self.update()
