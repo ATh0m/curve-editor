@@ -4,6 +4,8 @@ import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt
 
+from .curves import PointItem, CurveItem
+
 def binomial(i, n):
     """Binomial coefficient"""
     return math.factorial(n) / float(
@@ -34,9 +36,10 @@ def bezier_curve_range(n, points):
 
 class Canvas(QtWidgets.QLabel):
 
-    def __init__(self, points):
+    def __init__(self, curvesModel):
         super().__init__()
-        self.points = points
+        self.curvesModel = curvesModel
+        self.curvesModel.layoutChanged.connect(self.foo)
 
         pixmap = QtGui.QPixmap(800, 500)
         pixmap.fill(Qt.white)
@@ -44,9 +47,18 @@ class Canvas(QtWidgets.QLabel):
 
         self.draw_something()
 
+    def foo(self):
+        print('Points updated')
+
     def mousePressEvent(self, ev: QtGui.QMouseEvent) -> None:
         x, y = ev.x(), ev.y()
         print(x, y)
+
+        curve: CurveItem = self.curvesModel.rootItem.childItems[0]
+        point = PointItem((x, y), parent=curve)
+        curve.childItems.append(point)
+
+        self.curvesModel.layoutChanged.emit()
 
         # self.points.points.append((x, y))
         # self.points.layoutChanged.emit()

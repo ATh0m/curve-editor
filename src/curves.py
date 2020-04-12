@@ -1,46 +1,22 @@
-import sys
-from PyQt5.QtCore import QAbstractItemModel, QFile, QIODevice, QModelIndex, Qt
-from PyQt5.QtWidgets import QApplication, QTreeView, QHeaderView
-from collections import OrderedDict
-
-
-d = {'Users': {'files': [{'filename': 'file.txt', 'size': 1234, 'modified': 'blah'},
-                     {'filename': 'file2.txt', 'size': 1234, 'modified': 'blah'},
-                     {'filename': 'file3.txt', 'size': 1234, 'modified': 'blah'}],
-           'manu': {'files': [{'filename': 'file.txt', 'size': 1234, 'modified': 'blah'},
-                              {'filename': 'file2.txt', 'size': 1234, 'modified': 'blah'},
-                              {'filename': 'file3.txt', 'size': 1234, 'modified': 'blah'}],
-                    'Documents': {'files': []},
-                    },
-           },
-     'Applications': {'files': [{'filename': 'file.txt', 'size': 1234, 'modified': 'blah'},
-                                {'filename': 'file2.txt', 'size': 1234, 'modified': 'blah'},
-                                {'filename': 'file3.txt', 'size': 1234, 'modified': 'blah'}]
-                      }
-     }
-
-for i in range(500):
-    d['Users']['manu'][f'Documents-{i}'] = {'files': []}
-    for j in range(5000):
-        d['Users']['manu'][f'Documents-{i}']['files'].append({'filename': f'file-{j}.txt', 'size': 1234, 'modified': 'blah'})
+from PyQt5.QtCore import QAbstractItemModel, QModelIndex, Qt
 
 selected = set()
 
-
-class FileItem:
-    def __init__(self, filename, modified, size, parent=None):
+class PointItem:
+    def __init__(self, point, parent=None):
         self.parentItem = parent
-        self.itemData = [filename, modified, size]
+        self.itemData = [point]
         self.checkedState = False
+        self.isCheckable = False
 
     def childCount(self):
         return 0
 
     def columnCount(self):
-        return 3
+        return 1
 
     def data(self, column):
-        return self.itemData[column]
+        return str(self.itemData[0])
 
     def parent(self):
         return self.parentItem
@@ -63,66 +39,31 @@ class FileItem:
         else:
             return Qt.Unchecked
 
-def get_dict_from_path(path):
-    current_level = d
-    for folder in path:
-        current_level = current_level[folder]
-
-    return current_level
-
-class FolderItem():
-    def __init__(self, path=[], parent=None):
+class CurveItem():
+    def __init__(self, name, parent=None):
         self.parentItem = parent
-        self.path = path
+        self.name = name
+        self.type = 'Bezier'
         self.checkedState = False
+        self.isCheckable = True
         self.childItems = []
-
-        if self.path:
-            folder_content = get_dict_from_path(self.path)
-            if folder_content.get('files', False):
-                self.n_children = len(folder_content['files']) + len(folder_content) - 1
-            else:
-                self.n_children = len(folder_content)
-        else:
-            self.n_children = len(d)  # TODO: handle files at root level
-
-        self.is_loaded = False
-
-    def load_children(self):
-        self.childItems = []
-        if self.path:
-            child_dirs = []
-            folder_content = get_dict_from_path(self.path)
-            for folder in folder_content.keys():
-                if folder == 'files':
-                    for file in folder_content['files']:
-                        self.childItems.append(FileItem(file['filename'], file['modified'], file['size'], parent=self))
-                else:
-                    child_dirs.append(folder)
-        else:  # special case of root node. TODO: handle files at root level
-            child_dirs = d.keys()
-
-        for child_dir in child_dirs:
-            child_path = self.path + [child_dir]
-            self.childItems.append(FolderItem(path=child_path, parent=self))
-        self.is_loaded = True
 
     def child(self, row):
         return self.childItems[row]
 
     def childCount(self):
-        return self.n_children
+        return len(self.childItems)
 
     def columnCount(self):
-        return 3
+        return 2
 
     def setCheckedState(self, value):
         if value == 2:
             self.checkedState = True
-            selected.add('/'.join(self.path))
+            selected.add('/'.join(self.name))
         else:
             self.checkedState = False
-            selected.remove('/'.join(self.path))
+            selected.remove('/'.join(self.name))
         print(selected)
 
     def getCheckedState(self):
@@ -132,8 +73,8 @@ class FolderItem():
             return Qt.Unchecked
 
     def data(self, column):
-        if column == 0 and self.path:
-            return self.path[-1]
+        if column == 0:
+            return self.name
         else:
             return None
 
@@ -146,17 +87,16 @@ class FolderItem():
 
         return 0
 
-class TreeModel(QAbstractItemModel):
-    column_names = ['Name','Modified', 'Size']
+class CurvesModel(QAbstractItemModel):
+    column_names = ['Name', 'Type']
 
     def __init__(self, parent=None):
-        super(TreeModel, self).__init__(parent)
+        super().__init__(parent)
 
-        self.rootItem = FolderItem(path=[])
-        self.rootItem.load_children()
+        self.rootItem = CurveItem(name='root')
 
     def columnCount(self, parent):
-        return 3
+        return 2
 
     def data(self, index, role):
         if not index.isValid():
@@ -178,20 +118,14 @@ class TreeModel(QAbstractItemModel):
 
         return True
 
-    def canFetchMore(self, index):
-        if not index.isValid():
-            return False
-        item = index.internalPointer()
-        return not item.is_loaded
-
-    def fetchMore(self, index):
-        item = index.internalPointer()
-        item.load_children()
-
-
     def flags(self, index):
         if not index.isValid():
             return Qt.NoItemFlags
+
+        item = index.internalPointer()
+
+        if not item.isCheckable:
+            return Qt.ItemIsEnabled | Qt.ItemIsSelectable
 
         return Qt.ItemIsEnabled | Qt.ItemIsUserCheckable
 
