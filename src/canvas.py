@@ -48,8 +48,8 @@ class Canvas(QtWidgets.QLabel):
         x, y = ev.x(), ev.y()
         print(x, y)
 
-        self.points.points.append((x, y))
-        self.points.layoutChanged.emit()
+        # self.points.points.append((x, y))
+        # self.points.layoutChanged.emit()
 
     def draw_something(self):
         qp = QtGui.QPainter(self.pixmap())
