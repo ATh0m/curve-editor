@@ -1,174 +1,113 @@
-from PyQt5.QtCore import QAbstractItemModel, QModelIndex, Qt
+from PyQt5.QtCore import QAbstractListModel, Qt
+from PyQt5 import QtGui, QtCore
 
-selected = set()
+import math
 
-class PointItem:
-    def __init__(self, point, parent=None):
-        self.parentItem = parent
-        self.itemData = [point]
-        self.checkedState = False
-        self.isCheckable = False
+class CurvesModel(QAbstractListModel):
+    def __init__(self, *args, curves=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.curves = curves or []
 
-    def childCount(self):
-        return 0
+        # Sample curve
+        nodes = [(50, 170), (150, 370), (250, 35), (400, 320)]
+        curve = BezierCurve('Curve #1', nodes)
+        curve.calculate_points()
+        
+        self.add(curve)
 
-    def columnCount(self):
-        return 1
+    def add(self, curve):
+        self.curves.append(curve)
 
-    def data(self, column):
-        return str(self.itemData[0])
-
-    def parent(self):
-        return self.parentItem
-
-    def row(self):
-        return self.parentItem.childItems.index(self)
-
-    def setCheckedState(self, value):
-        if value == 2:
-            self.checkedState = True
-            selected.add('/'.join(self.parentItem.path)+'/'+self.itemData[0])
-        else:
-            self.checkedState = False
-            selected.remove('/'.join(self.parentItem.path)+'/'+self.itemData[0])
-        print(selected)
-
-    def getCheckedState(self):
-        if self.checkedState:
-            return Qt.Checked
-        else:
-            return Qt.Unchecked
-
-class CurveItem():
-    def __init__(self, name, parent=None):
-        self.parentItem = parent
-        self.name = name
-        self.type = 'Bezier'
-        self.checkedState = False
-        self.isCheckable = True
-        self.childItems = []
-
-    def child(self, row):
-        return self.childItems[row]
-
-    def childCount(self):
-        return len(self.childItems)
-
-    def columnCount(self):
-        return 2
-
-    def setCheckedState(self, value):
-        if value == 2:
-            self.checkedState = True
-            selected.add('/'.join(self.name))
-        else:
-            self.checkedState = False
-            selected.remove('/'.join(self.name))
-        print(selected)
-
-    def getCheckedState(self):
-        if self.checkedState:
-            return Qt.Checked
-        else:
-            return Qt.Unchecked
-
-    def data(self, column):
-        if column == 0:
-            return self.name
-        else:
-            return None
-
-    def parent(self):
-        return self.parentItem
-
-    def row(self):
-        if self.parentItem:
-            return self.parentItem.childItems.index(self)
-
-        return 0
-
-class CurvesModel(QAbstractItemModel):
-    column_names = ['Name', 'Type']
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-
-        self.rootItem = CurveItem(name='root')
-
-    def columnCount(self, parent):
-        return 2
-
-    def data(self, index, role):
-        if not index.isValid():
-            return None
-
-        item = index.internalPointer()
-
+    def data(self, index, role=None):
         if role == Qt.DisplayRole:
-            return item.data(index.column())
-        elif role == Qt.CheckStateRole and index.column() == 0:
-            return item.getCheckedState()
-        else:
-            return None
+            curve = self.curves[index.row()]
+            return f"{curve.name} | {curve.type} | {len(curve.nodes)} nodes"
 
-    def setData(self, index, value, role=Qt.EditRole):
-        if role == Qt.CheckStateRole:
-            item = index.internalPointer()
-            item.setCheckedState(value)
+    def rowCount(self, parent=None):
+        return len(self.curves)
 
-        return True
+class Curve(object):
+    def __init__(self, name, nodes=None):
+        self.nodes = nodes or []
+        self.points = []
 
-    def flags(self, index):
-        if not index.isValid():
-            return Qt.NoItemFlags
+        self.name = name
+        self.type = "Base Curve"
 
-        item = index.internalPointer()
+    def calculate_points(self):
+        raise NotImplementedError
 
-        if not item.isCheckable:
-            return Qt.ItemIsEnabled | Qt.ItemIsSelectable
 
-        return Qt.ItemIsEnabled | Qt.ItemIsUserCheckable
+class BezierCurve(Curve):
+    def __init__(self, name, nodes=None):
+        super().__init__(name, nodes)
 
-    def headerData(self, section, orientation, role):
-        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
-            return self.column_names[section]
+        self.type = "Bezier Curve"
 
-        return None
+    @staticmethod
+    def binomial(i, n):
+        """Binomial coefficient"""
+        return math.factorial(n) / float(math.factorial(i) * math.factorial(n - i))
 
-    def index(self, row, column, parent):
-        if not self.hasIndex(row, column, parent):
-            return QModelIndex()
+    @staticmethod
+    def bernstein(t, i, n):
+        """Bernstein polynom"""
+        return BezierCurve.binomial(i, n) * (t ** i) * ((1 - t) ** (n - i))
 
-        if not parent.isValid():
-            parentItem = self.rootItem
-        else:
-            parentItem = parent.internalPointer()
+    @staticmethod
+    def bezier(t, nodes):
+        """Calculate coordinate of a point in the bezier curve"""
+        n = len(nodes) - 1
+        x = y = 0
+        for i, pos in enumerate(nodes):
+            bern = BezierCurve.bernstein(t, i, n)
+            x += pos[0] * bern
+            y += pos[1] * bern
+        return x, y
 
-        childItem = parentItem.child(row)
-        if childItem:
-            return self.createIndex(row, column, childItem)
-        else:
-            return QModelIndex()
+    @staticmethod
+    def bezier_curve_range(n, nodes):
+        """Range of points in a curve bezier"""
+        for i in range(n):
+            t = i / float(n - 1)
+            yield BezierCurve.bezier(t, nodes)
 
-    def parent(self, index):
-        if not index.isValid():
-            return QModelIndex()
+    def calculate_points(self):
+        steps = 1000
 
-        childItem = index.internalPointer()
-        parentItem = childItem.parent()
+        points = [self.nodes[0]]
+        for point in BezierCurve.bezier_curve_range(steps, self.nodes):
+            points.append(point)
 
-        if parentItem == self.rootItem:
-            return QModelIndex()
+        self.points = points
+        return self.points
 
-        return self.createIndex(parentItem.row(), 0, parentItem)
+    def draw(self, qp: QtGui.QPainter):
+        blackPen = QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.DashLine)
+        redPen = QtGui.QPen(QtCore.Qt.red, 1, QtCore.Qt.DashLine)
+        bluePen = QtGui.QPen(QtCore.Qt.blue, 1, QtCore.Qt.DashLine)
+        greenPen = QtGui.QPen(QtCore.Qt.green, 1, QtCore.Qt.DashLine)
+        redBrush = QtGui.QBrush(QtCore.Qt.red)
 
-    def rowCount(self, parent):
-        if parent.column() > 0:
-            return 0
+        oldPoint = self.nodes[0]
 
-        if not parent.isValid():
-            parentItem = self.rootItem
-        else:
-            parentItem = parent.internalPointer()
+        qp.setPen(redPen)
+        qp.setBrush(redBrush)
+        qp.drawEllipse(oldPoint[0] - 3, oldPoint[1] - 3, 6, 6)
 
-        return parentItem.childCount()
+        qp.drawText(oldPoint[0] + 5, oldPoint[1] - 3, '1')
+        for i, point in enumerate(self.nodes[1:]):
+            i += 2
+            qp.setPen(blackPen)
+            qp.drawLine(oldPoint[0], oldPoint[1], point[0], point[1])
+
+            qp.setPen(redPen)
+            qp.drawEllipse(point[0] - 3, point[1] - 3, 6, 6)
+
+            qp.drawText(point[0] + 5, point[1] - 3, '%d' % i)
+            oldPoint = point
+
+        qp.setPen(bluePen)
+        for point in self.points:
+            qp.drawLine(oldPoint[0], oldPoint[1], point[0], point[1])
+            oldPoint = point
