@@ -27,19 +27,27 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.listView.setModel(self.model)
         self.listView.doubleClicked['QModelIndex'].connect(self.curve_details)
+        self.listView.clicked['QModelIndex'].connect(self.curve_selected)
 
         scene = QtWidgets.QGraphicsScene()
         scene.addItem(self.canvas)
         self.graphicsView.setScene(scene)
 
-        self.pushButton.clicked.connect(self.add_new_curve)
+        self.addCurve.clicked.connect(self.add_new_curve)
+        self.removeCurve.clicked.connect(self.remove_curve)
 
-        self.model.layoutChanged.emit()
+        self.model.updated()
 
     def curve_details(self, index):
         details = CurveDetails(index.row(), parent=self)
         details.setModel(self.model)
         details.show()
+
+    def curve_selected(self, index):
+        index = index.row()
+        print(index)
+
+        self.model.select(index)
 
     def add_new_curve(self):
         dialog = NewCurveDialog(parent=self)
@@ -48,3 +56,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             curve = BezierCurve(name)
             self.model.add(curve)
             self.model.layoutChanged.emit()
+
+    def remove_curve(self):
+        self.model.remove_selected()

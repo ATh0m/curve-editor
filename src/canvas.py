@@ -19,7 +19,10 @@ class Canvas(QtWidgets.QGraphicsPixmapItem):
     def mousePressEvent(self, ev) -> None:
         x, y = ev.pos().x(), ev.pos().y()
 
-        curve = self.model.curves[0]
+        curve = self.model.selected_curve
+        if not curve:
+            return
+
         curve.nodes.append((x, y))
         curve.calculate_points()
 
