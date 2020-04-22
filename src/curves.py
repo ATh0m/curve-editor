@@ -2,6 +2,7 @@ from PyQt5.QtCore import QAbstractListModel, Qt
 from PyQt5 import QtGui, QtCore
 
 import math
+import numpy as np
 
 class CurvesModel(QAbstractListModel):
     def __init__(self, *args, curves=None, **kwargs):
@@ -66,6 +67,45 @@ class Curve(object):
 
     def draw(self, qp: QtGui.QPainter):
         raise NotImplementedError
+
+    def calculate_center(self):
+        center = [0, 0]
+        for (x, y) in self.nodes:
+            center[0] += x
+            center[1] += y
+
+        n = len(self.nodes)
+        center = (center[0] / n, center[1] / n)
+        return center
+
+    def translate(self, dx, dy):
+        self.nodes = [(x + dx, y + dy) for x, y in self.nodes]
+        self.calculate_points()
+
+    def scale(self, scalar):
+        (cx, cy) = self.calculate_center()
+
+        for i, (x, y) in enumerate(self.nodes):
+            dx, dy = x - cx, y - cy
+            self.nodes[i] = (cx + dx * scalar, cy + dy * scalar)
+
+        self.calculate_points()
+
+    def rotate(self, theta):
+        theta = theta * np.pi / 180
+
+        center = np.array(self.calculate_center()).reshape(2, 1)
+        nodes = np.array(self.nodes).T
+
+        rotate_matrix = np.array([[np.cos(theta), -np.sin(theta)],
+                                  [np.sin(theta), np.cos(theta)]])
+
+        new_nodes = center + rotate_matrix.dot(nodes - center)
+        self.nodes = [(x, y) for x, y in new_nodes.T]
+
+        print(nodes, new_nodes)
+
+        self.calculate_points()
 
 
 class BezierCurve(Curve):
