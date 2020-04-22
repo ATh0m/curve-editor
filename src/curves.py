@@ -34,6 +34,8 @@ class Curve(object):
         self.name = name
         self.type = "Base Curve"
 
+        self.color = QtCore.Qt.blue
+
     def calculate_points(self):
         raise NotImplementedError
 
@@ -83,6 +85,9 @@ class BezierCurve(Curve):
         return self.points
 
     def draw(self, qp: QtGui.QPainter):
+        if not self.nodes:
+            return
+
         blackPen = QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.DashLine)
         redPen = QtGui.QPen(QtCore.Qt.red, 1, QtCore.Qt.DashLine)
         bluePen = QtGui.QPen(QtCore.Qt.blue, 1, QtCore.Qt.DashLine)

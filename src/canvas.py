@@ -30,6 +30,7 @@ class Canvas(QtWidgets.QGraphicsPixmapItem):
         pixmap.fill(Qt.white)
 
         qp = QtGui.QPainter(pixmap)
+        qp.setRenderHint(QtGui.QPainter.Antialiasing, True)
 
         for curve in self.model.curves:
             curve.draw(qp)
