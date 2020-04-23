@@ -252,6 +252,19 @@
      </rect>
     </property>
    </widget>
+   <widget class="QCheckBox" name="hiddenInput">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>20</y>
+      <width>86</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>hidden</string>
+    </property>
+   </widget>
   </widget>
  </widget>
  <resources/>

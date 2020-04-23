@@ -18,6 +18,8 @@ class CurveDetails(QtWidgets.QMainWindow, Ui_CurveDetails):
 
         self.nodesList.itemChanged.connect(self.node_changed)
 
+        self.hiddenInput.stateChanged.connect(self.hide_curve)
+
     def showEvent(self, event: QtGui.QShowEvent) -> None:
         super(CurveDetails, self).showEvent(event)
         self.fill()
@@ -39,6 +41,8 @@ class CurveDetails(QtWidgets.QMainWindow, Ui_CurveDetails):
             item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)
             self.nodesList.addItem(item)
 
+        self.hiddenInput.setCheckState(self.curve.hidden)
+
     def node_changed(self, item):
         index = item.index
         val = item.text()
@@ -48,6 +52,14 @@ class CurveDetails(QtWidgets.QMainWindow, Ui_CurveDetails):
 
         self.curve.nodes[index] = (x, y)
         self.model.updated()
+
+    def hide_curve(self, state):
+        state = bool(state)
+        print('Hide', state)
+
+        if state != self.curve.hidden:
+            self.curve.hidden = state
+            self.model.updated()
 
     def translate_curve(self):
         dx = float(self.translate_dx.text())

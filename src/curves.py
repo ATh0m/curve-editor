@@ -78,6 +78,7 @@ class Curve(object):
         self.type = "Base Curve"
 
         self.selected = False
+        self.hidden = False
 
         self.color = "blue"
 
@@ -88,7 +89,8 @@ class Curve(object):
         raise NotImplementedError
 
     def draw(self, qp: QtGui.QPainter):
-        raise NotImplementedError
+        if self.hidden or not self.nodes:
+            return
 
     def calculate_center(self):
         center = [0, 0]
@@ -128,6 +130,9 @@ class Curve(object):
         print(nodes, new_nodes)
 
         self.calculate_points()
+
+    def hide(self, state):
+        self.hidden = state
 
     def to_dict(self):
         data =  {
@@ -203,8 +208,7 @@ class BezierCurve(Curve):
         return self.points
 
     def draw(self, qp: QtGui.QPainter):
-        if not self.nodes:
-            return
+        if self.hidden or not self.nodes: return
 
         blackPen = QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.DashLine)
         redPen = QtGui.QPen(QtCore.Qt.red, 1, QtCore.Qt.DashLine)
@@ -248,8 +252,7 @@ class PolygonalCurve(Curve):
         return self.points
 
     def draw(self, qp: QtGui.QPainter):
-        if not self.nodes:
-            return
+        if self.hidden or not self.nodes: return
 
         blackPen = QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.DashLine)
         bluePen = QtGui.QPen(QtCore.Qt.blue, 1, QtCore.Qt.SolidLine)
