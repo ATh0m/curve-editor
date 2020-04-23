@@ -13,13 +13,6 @@ class CurvesModel(QAbstractListModel):
         self.selected_curve = None
         self.selected_curve_index = None
 
-        # Sample curve
-        nodes = [(50, 170), (150, 370), (250, 35), (400, 320)]
-        curve = PolygonalCurve('Curve #1', nodes)
-        curve.calculate_points()
-        
-        self.add(curve)
-
     def add(self, curve):
         self.curves.append(curve)
 
@@ -151,8 +144,11 @@ class Curve(object):
 
         types = {"Bezier Curve": BezierCurve, "Polygonal Curve": PolygonalCurve}
 
-        curve = types[type_](data["name"], data["nodes"])
-        curve.color = data["color"]
+        nodes = data["nodes"] if "nodes" in data else []
+        curve = types[type_](data["name"], nodes)
+
+        if "color" in data:
+            curve.color = data["color"]
 
         curve.calculate_points()
         return curve
@@ -193,6 +189,10 @@ class BezierCurve(Curve):
             yield BezierCurve.bezier(t, nodes)
 
     def calculate_points(self):
+        if not self.nodes:
+            self.points = []
+            return self.points
+
         steps = 1000
 
         points = [self.nodes[0]]

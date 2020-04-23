@@ -41,3 +41,8 @@ class Canvas(QtWidgets.QGraphicsPixmapItem):
         qp.end()
         self.setPixmap(pixmap)
         print('Updated')
+
+    def screenshot(self, filename):
+        self.pixmap().save(filename)
+
+        print('OK')

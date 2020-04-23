@@ -18,6 +18,8 @@ class NewCurveDialog(QtWidgets.QDialog, Ui_NewCurve):
         super(NewCurveDialog, self).__init__(*args, **kwargs)
         self.setupUi(self)
 
+        self.typesList.addItems(["Bezier Curve", "Polygonal Curve"])
+
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, *args, obj=None, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
@@ -26,6 +28,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionSave.triggered.connect(self.save)
         self.actionLoad.triggered.connect(self.load)
         self.actionNew.triggered.connect(self.new)
+        self.actionScreenshot.triggered.connect(self.screenshot)
 
         self.model = CurvesModel()
 
@@ -60,12 +63,29 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         dialog = NewCurveDialog(parent=self)
         if dialog.exec_():
             name = dialog.name_line.text()
-            curve = BezierCurve(name)
+            type_ = dialog.typesList.currentText()
+
+            curve = Curve.from_dict({"name": name, "type": type_})
+
             self.model.add(curve)
             self.model.layoutChanged.emit()
 
     def remove_curve(self):
         self.model.remove_selected()
+
+    def screenshot(self):
+        options = QtWidgets.QFileDialog.Options()
+        options |= QtWidgets.QFileDialog.DontUseNativeDialog
+        filename, _ = QtWidgets.QFileDialog.getSaveFileName(self,
+                                                            "Screenshot",
+                                                            "",
+                                                            "PNG (*.png)", options=options)
+
+        if filename:
+            if not filename.endswith(".png"):
+                filename += ".png"
+
+            self.canvas.screenshot(filename)
 
     def new(self):
         self.model.new()

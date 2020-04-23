@@ -29,13 +29,11 @@ class CurveDetails(QtWidgets.QMainWindow, Ui_CurveDetails):
         self.curve = self.model.curves[self.index]
 
     def fill(self):
-        curve = self.model.curves[self.index]
-
-        self.name_label.setText(curve.name)
-        self.nodes_label.setText(str(len(curve.nodes)))
+        self.name_label.setText(self.curve.name)
+        self.nodes_label.setText(str(len(self.curve.nodes)))
 
         self.nodesList.clear()
-        for i, (x, y) in enumerate(curve.nodes):
+        for i, (x, y) in enumerate(self.curve.nodes):
             item = QtWidgets.QListWidgetItem(f'({x}, {y})')
             item.index = i
             item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)

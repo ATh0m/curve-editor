@@ -65,7 +65,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QComboBox" name="type_box">
+  <widget class="QComboBox" name="typesList">
    <property name="geometry">
     <rect>
      <x>80</x>
@@ -74,11 +74,6 @@
      <height>32</height>
     </rect>
    </property>
-   <item>
-    <property name="text">
-     <string>Bezier Curve</string>
-    </property>
-   </item>
   </widget>
  </widget>
  <resources/>
