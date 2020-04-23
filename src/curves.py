@@ -2,6 +2,7 @@ from PyQt5.QtCore import QAbstractListModel, Qt
 from PyQt5 import QtGui, QtCore
 
 import math
+import json
 import numpy as np
 
 class CurvesModel(QAbstractListModel):
@@ -25,7 +26,7 @@ class CurvesModel(QAbstractListModel):
     def data(self, index, role=None):
         if role == Qt.DisplayRole:
             curve = self.curves[index.row()]
-            return f"{curve.name} | {curve.type} | {len(curve.nodes)} nodes"
+            return str(curve)
 
     def rowCount(self, parent=None):
         return len(self.curves)
@@ -50,6 +51,31 @@ class CurvesModel(QAbstractListModel):
     def updated(self):
         self.layoutChanged.emit()
 
+    def save(self, filename):
+        curves = [curve.to_dict() for curve in self.curves]
+        with open(filename, 'w') as outfile:
+            json.dump(curves, outfile)
+
+    def load(self, filename):
+        self.new(update=False)
+
+        with open(filename, 'r') as json_file:
+            data = json.load(json_file)
+
+        curves = [Curve.from_dict(d) for d in data]
+        self.curves = curves
+
+        self.updated()
+
+    def new(self, update=True):
+        self.curves = []
+        self.selected_curve = None
+        self.selected_curve_index = None
+
+        if update:
+            self.updated()
+
+
 class Curve(object):
     def __init__(self, name, nodes=None):
         self.nodes = nodes or []
@@ -60,7 +86,10 @@ class Curve(object):
 
         self.selected = False
 
-        self.color = QtCore.Qt.blue
+        self.color = "blue"
+
+    def __repr__(self):
+        return f"{self.name} | {self.type} | {len(self.nodes)} nodes"
 
     def calculate_points(self):
         raise NotImplementedError
@@ -106,6 +135,27 @@ class Curve(object):
         print(nodes, new_nodes)
 
         self.calculate_points()
+
+    def to_dict(self):
+        data =  {
+            "name": self.name,
+            "type": self.type,
+            "color": self.color,
+            "nodes": self.nodes
+        }
+        return data
+
+    @classmethod
+    def from_dict(cls, data):
+        type_ = data["type"]
+
+        types = {"Bezier Curve": BezierCurve, "Polygonal Curve": PolygonalCurve}
+
+        curve = types[type_](data["name"], data["nodes"])
+        curve.color = data["color"]
+
+        curve.calculate_points()
+        return curve
 
 
 class BezierCurve(Curve):

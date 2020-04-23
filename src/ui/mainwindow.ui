@@ -87,6 +87,7 @@
     </property>
     <addaction name="actionNew"/>
     <addaction name="actionSave"/>
+    <addaction name="actionLoad"/>
     <addaction name="actionQuit"/>
    </widget>
    <addaction name="menuFile"/>
@@ -217,6 +218,11 @@
   <action name="actionQuit">
    <property name="text">
     <string>Quit</string>
+   </property>
+  </action>
+  <action name="actionLoad">
+   <property name="text">
+    <string>Load</string>
    </property>
   </action>
  </widget>

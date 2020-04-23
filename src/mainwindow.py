@@ -8,9 +8,10 @@ from .ui.NewCurve import Ui_NewCurve
 from .curvedetails import CurveDetails
 
 from .canvas import Canvas
-from .curves import CurvesModel, BezierCurve
+from .curves import CurvesModel, BezierCurve, Curve
 
 import pickle
+import json
 
 class NewCurveDialog(QtWidgets.QDialog, Ui_NewCurve):
     def __init__(self, *args, obj=None, **kwargs):
@@ -23,6 +24,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setupUi(self)
 
         self.actionSave.triggered.connect(self.save)
+        self.actionLoad.triggered.connect(self.load)
+        self.actionNew.triggered.connect(self.new)
 
         self.model = CurvesModel()
 
@@ -64,11 +67,33 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def remove_curve(self):
         self.model.remove_selected()
 
+    def new(self):
+        self.model.new()
+
     def save(self):
         options = QtWidgets.QFileDialog.Options()
         options |= QtWidgets.QFileDialog.DontUseNativeDialog
-        filename, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save", "", "Pickle (*.pickle)", options=options)
+        filename, _ = QtWidgets.QFileDialog.getSaveFileName(self,
+                                                            "Save",
+                                                            "",
+                                                            "JSON (*.json)", options=options)
 
         if filename:
-            with open(f'{filename}.pickle', 'wb') as handle:
-                pickle.dump(self.model, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            if not filename.endswith(".json"):
+                filename += ".json"
+
+            self.model.save(filename)
+
+    def load(self):
+        options = QtWidgets.QFileDialog.Options()
+        options |= QtWidgets.QFileDialog.DontUseNativeDialog
+        filename, _ = QtWidgets.QFileDialog.getOpenFileName(self,
+                                                            "Open",
+                                                            "",
+                                                            "JSON (*.json)", options=options)
+
+        if filename:
+            if not filename.endswith(".json"):
+                filename += ".json"
+
+            self.model.load(filename)

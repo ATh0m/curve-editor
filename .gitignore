@@ -319,3 +319,4 @@ pip-selfcheck.json
 
 src/ui/*.py
 *.pickle
+*.json
