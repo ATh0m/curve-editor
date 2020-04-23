@@ -10,10 +10,13 @@ class CurveDetails(QtWidgets.QMainWindow, Ui_CurveDetails):
         self.setupUi(self)
 
         self.index = index
+        self.curve = None
 
         self.translateApply.clicked.connect(self.translate_curve)
         self.scaleApply.clicked.connect(self.scale_curve)
         self.rotateApply.clicked.connect(self.rotate_curve)
+
+        self.nodesList.itemChanged.connect(self.node_changed)
 
     def showEvent(self, event: QtGui.QShowEvent) -> None:
         super(CurveDetails, self).showEvent(event)
@@ -23,11 +26,30 @@ class CurveDetails(QtWidgets.QMainWindow, Ui_CurveDetails):
         self.model = model
         self.model.layoutChanged.connect(self.fill)
 
+        self.curve = self.model.curves[self.index]
+
     def fill(self):
         curve = self.model.curves[self.index]
 
         self.name_label.setText(curve.name)
         self.nodes_label.setText(str(len(curve.nodes)))
+
+        self.nodesList.clear()
+        for i, (x, y) in enumerate(curve.nodes):
+            item = QtWidgets.QListWidgetItem(f'({x}, {y})')
+            item.index = i
+            item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)
+            self.nodesList.addItem(item)
+
+    def node_changed(self, item):
+        index = item.index
+        val = item.text()
+
+        x, y = val.strip('()').split(',')
+        x, y = float(x), float(y)
+
+        self.curve.nodes[index] = (x, y)
+        self.model.updated()
 
     def translate_curve(self):
         dx = float(self.translate_dx.text())

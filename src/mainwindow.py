@@ -10,6 +10,8 @@ from .curvedetails import CurveDetails
 from .canvas import Canvas
 from .curves import CurvesModel, BezierCurve
 
+import pickle
+
 class NewCurveDialog(QtWidgets.QDialog, Ui_NewCurve):
     def __init__(self, *args, obj=None, **kwargs):
         super(NewCurveDialog, self).__init__(*args, **kwargs)
@@ -19,6 +21,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, *args, obj=None, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
         self.setupUi(self)
+
+        self.actionSave.triggered.connect(self.save)
 
         self.model = CurvesModel()
 
@@ -59,3 +63,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def remove_curve(self):
         self.model.remove_selected()
+
+    def save(self):
+        options = QtWidgets.QFileDialog.Options()
+        options |= QtWidgets.QFileDialog.DontUseNativeDialog
+        filename, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save", "", "Pickle (*.pickle)", options=options)
+
+        if filename:
+            with open(f'{filename}.pickle', 'wb') as handle:
+                pickle.dump(self.model, handle, protocol=pickle.HIGHEST_PROTOCOL)

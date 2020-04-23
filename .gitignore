@@ -318,3 +318,4 @@ pip-selfcheck.json
 # End of https://www.gitignore.io/api/qt,venv,macos,python,qtcreator,virtualenv,pycharm+all
 
 src/ui/*.py
+*.pickle
