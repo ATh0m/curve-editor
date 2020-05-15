@@ -51,6 +51,7 @@ class CurveDetails(QtWidgets.QMainWindow, Ui_CurveDetails):
         x, y = float(x), float(y)
 
         self.curve.nodes[index] = (x, y)
+        self.curve.calculate_points()
         self.model.updated()
 
     def hide_curve(self, state):

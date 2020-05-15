@@ -1,17 +1,20 @@
+import json
+import pickle
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QHeaderView
 
+from .canvas import Canvas
+from .curvedetails import CurveDetails
+from .curves import BezierCurve, Curve, PolygonalCurve
+from .model import CurvesModel
+
+from .states import State, DefaultState, SelectCurveState
+
 from .ui.MainWindow import Ui_MainWindow
 from .ui.NewCurve import Ui_NewCurve
 
-from .curvedetails import CurveDetails
-
-from .canvas import Canvas
-from .curves import CurvesModel, BezierCurve, Curve
-
-import pickle
-import json
 
 class NewCurveDialog(QtWidgets.QDialog, Ui_NewCurve):
     def __init__(self, *args, obj=None, **kwargs):
@@ -19,6 +22,7 @@ class NewCurveDialog(QtWidgets.QDialog, Ui_NewCurve):
         self.setupUi(self)
 
         self.typesList.addItems(["Bezier Curve", "Polygonal Curve"])
+
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, *args, obj=None, **kwargs):
@@ -30,7 +34,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionNew.triggered.connect(self.new)
         self.actionScreenshot.triggered.connect(self.screenshot)
 
-        self.model = CurvesModel()
+        self.selected_curve = None
+
+        self.model = CurvesModel(parent=self)
+        self.model.layoutChanged.connect(self.model_changed)
 
         self.canvas = Canvas()
         self.canvas.setModel(self.model)
@@ -47,6 +54,49 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.removeCurve.clicked.connect(self.remove_curve)
 
         self.model.updated()
+
+        self.add_toolbar()
+
+    def model_changed(self):
+        print('Update window')
+
+        if self.selected_curve is not self.model.selected_curve:
+            if self.selected_curve is not None:
+                self.removeToolBar(self.selected_curve.toolbar)
+
+            self.selected_curve = self.model.selected_curve
+
+            if self.selected_curve is not None:
+                if self.selected_curve.toolbar is not None:
+                    self.addToolBarBreak()
+                    self.addToolBar(Qt.TopToolBarArea,
+                                    self.selected_curve.toolbar)
+                    self.selected_curve.toolbar.show()
+                    print("Added toolbar")
+
+    def new_bezier_action_triggered(self):
+        curve = BezierCurve('')
+        self.model.add(curve, selected=True)
+
+        curve.add_point_action.trigger()
+
+    def select_curve_action(self, state):
+        print("select curve mode")
+        self.model.state = SelectCurveState()
+        pass
+
+    def add_toolbar(self):
+        new_bezier_action = QtWidgets.QAction("New Bezier", self)
+        # button_action.setStatusTip("This is your button")
+        new_bezier_action.triggered.connect(self.new_bezier_action_triggered)
+        # new_bezier_action.setCheckable(True)
+        self.toolBar.addAction(new_bezier_action)
+
+        select_action = QtWidgets.QAction("Select curve", self)
+        select_action.triggered.connect(self.select_curve_action)
+        self.toolBar.addAction(select_action)
+
+        # self.addToolBarBreak()
 
     def curve_details(self, index):
         details = CurveDetails(index.row(), parent=self)
@@ -65,7 +115,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             name = dialog.name_line.text()
             type_ = dialog.typesList.currentText()
 
-            curve = Curve.from_dict({"name": name, "type": type_})
+            if type_ == 'Bezier Curve':
+                curve = BezierCurve.from_dict({"name": name, "type": type_})
+            else:
+                curve = PolygonalCurve.from_dict({"name": name, "type": type_})
 
             self.model.add(curve)
             self.model.layoutChanged.emit()
@@ -79,7 +132,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         filename, _ = QtWidgets.QFileDialog.getSaveFileName(self,
                                                             "Screenshot",
                                                             "",
-                                                            "PNG (*.png)", options=options)
+                                                            "PNG (*.png)",
+                                                            options=options)
 
         if filename:
             if not filename.endswith(".png"):
@@ -96,7 +150,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         filename, _ = QtWidgets.QFileDialog.getSaveFileName(self,
                                                             "Save",
                                                             "",
-                                                            "JSON (*.json)", options=options)
+                                                            "JSON (*.json)",
+                                                            options=options)
 
         if filename:
             if not filename.endswith(".json"):
@@ -110,7 +165,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         filename, _ = QtWidgets.QFileDialog.getOpenFileName(self,
                                                             "Open",
                                                             "",
-                                                            "JSON (*.json)", options=options)
+                                                            "JSON (*.json)",
+                                                            options=options)
 
         if filename:
             if not filename.endswith(".json"):
