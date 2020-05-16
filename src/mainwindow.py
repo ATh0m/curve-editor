@@ -10,7 +10,7 @@ from .curvedetails import CurveDetails
 from .curves import BezierCurve, PolygonalCurve
 from .model import CurvesModel
 
-from .states import SelectCurveState
+from .states import SelectCurveState, RemoveCurveState
 
 from .ui.MainWindow import Ui_MainWindow
 from .ui.NewCurve import Ui_NewCurve
@@ -80,10 +80,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         curve.add_point_action.trigger()
 
-    def select_curve_action(self, state):
+    def select_curve_action_triggered(self, state):
         logger.info("select curve mode")
         self.model.state = SelectCurveState()
-        pass
 
     def add_toolbar(self):
         new_bezier_action = QtWidgets.QAction("New Bezier", self)
@@ -93,8 +92,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolBar.addAction(new_bezier_action)
 
         select_action = QtWidgets.QAction("Select curve", self)
-        select_action.triggered.connect(self.select_curve_action)
+        select_action.triggered.connect(self.select_curve_action_triggered)
         self.toolBar.addAction(select_action)
+
+        remove_curve_action = QtWidgets.QAction("Remove curve", self)
+        remove_curve_action.triggered.connect(self.remove_curve_action_triggered)
+        self.toolBar.addAction(remove_curve_action)
 
         # self.addToolBarBreak()
 
@@ -122,6 +125,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             self.model.add(curve)
             self.model.layoutChanged.emit()
+
+    def remove_curve_action_triggered(self, state):
+        logger.info("remove curve mode")
+        self.model.state = RemoveCurveState()
 
     def remove_curve(self):
         self.model.remove_selected()

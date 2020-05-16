@@ -78,6 +78,13 @@ class CurvesModel(QAbstractListModel):
             self.selected_curve_index = None
             self.updated()
 
+    def remove_curve(self, index):
+        if index == self.selected_curve_index:
+            self.remove_selected()
+        else:
+            self.curves.pop(index)
+            self.updated()
+
     def updated(self):
         self.layoutChanged.emit()
 

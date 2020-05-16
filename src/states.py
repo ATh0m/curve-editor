@@ -15,6 +15,10 @@ class SelectCurveState(DefaultState):
     pass
 
 
+class RemoveCurveState(DefaultState):
+    pass
+
+
 class AddPointState(DefaultState):
     def __init__(self, curve):
         super().__init__()

@@ -6,7 +6,7 @@ from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtCore import Qt
 
 from .model import CurvesModel
-from .states import SelectCurveState, AddPointState, MovePointState
+from .states import SelectCurveState, AddPointState, MovePointState, RemoveCurveState
 
 
 class Canvas(QtWidgets.QGraphicsPixmapItem):
@@ -35,6 +35,17 @@ class Canvas(QtWidgets.QGraphicsPixmapItem):
                 logger.info(f'Selected curve: {index}')
             else:
                 self.model.deselect()
+
+            self.model.state = self.model.state.nextState()
+
+        elif isinstance(self.model.state, RemoveCurveState):
+            logger.info('removing')
+
+            index, dist = self.model.distance_to_nearest_curve(x, y)
+            logger.info(index, dist)
+            if dist is not None and dist < 10:
+                self.model.remove_curve(index)
+                logger.info(f'Remove curve: {index}')
 
             self.model.state = self.model.state.nextState()
 
