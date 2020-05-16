@@ -1,19 +1,16 @@
 import logging
+
 logger = logging.getLogger('curve-editor')
 
-import json
-import pickle
-
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QHeaderView
 
 from .canvas import Canvas
 from .curvedetails import CurveDetails
-from .curves import BezierCurve, Curve, PolygonalCurve
+from .curves import BezierCurve, PolygonalCurve
 from .model import CurvesModel
 
-from .states import State, DefaultState, SelectCurveState
+from .states import SelectCurveState
 
 from .ui.MainWindow import Ui_MainWindow
 from .ui.NewCurve import Ui_NewCurve

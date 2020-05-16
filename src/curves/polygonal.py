@@ -1,4 +1,3 @@
-from PyQt5.QtCore import QAbstractListModel, Qt
 from PyQt5 import QtGui, QtCore
 
 from .curves import Curve

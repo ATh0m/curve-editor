@@ -1,18 +1,17 @@
 import logging
+
 logger = logging.getLogger('curve-editor')
 
-import math
-import sys
-
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtCore import Qt
 
 from .model import CurvesModel
-from .states import SelectCurveState, DefaultState, AddPointState, MovePointState
+from .states import SelectCurveState, AddPointState, MovePointState
 
 
 class Canvas(QtWidgets.QGraphicsPixmapItem):
     """ Canvas for drawing"""
+
     def __init__(self):
         super().__init__(QtGui.QPixmap(930, 690))
         self.model: CurvesModel = None
@@ -48,12 +47,12 @@ class Canvas(QtWidgets.QGraphicsPixmapItem):
 
         elif isinstance(self.model.state, MovePointState):
             curve = self.model.state.curve
-            
+
             index, dist = curve.nearest_node(x, y)
 
             if dist is not None and dist < 10:
                 self.model.state.selected_point = index
-            
+
     def mouseMoveEvent(self, ev) -> None:
         x, y = ev.pos().x(), ev.pos().y()
         # logger.info(f"MOVE: ({x}, {y})")

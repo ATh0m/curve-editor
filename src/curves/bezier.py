@@ -1,10 +1,13 @@
-from PyQt5.QtCore import QAbstractListModel, Qt
-from PyQt5 import QtGui, QtCore, QtWidgets
+import logging
+
+logger = logging.getLogger('curve-editor')
 
 import math
 
+from PyQt5 import QtGui, QtCore, QtWidgets
+
+from src.states import DefaultState, MovePointState
 from .curves import Curve
-from src.states import AddPointState, DefaultState, MovePointState
 
 
 class BezierCurve(Curve):
@@ -22,7 +25,7 @@ class BezierCurve(Curve):
     @staticmethod
     def bernstein(t, i, n):
         """Bernstein polynom"""
-        return BezierCurve.binomial(i, n) * (t**i) * ((1 - t)**(n - i))
+        return BezierCurve.binomial(i, n) * (t ** i) * ((1 - t) ** (n - i))
 
     @staticmethod
     def bezier(t, nodes):
@@ -51,14 +54,27 @@ class BezierCurve(Curve):
         self.move_point_action.setCheckable(True)
         self.toolbar.addAction(self.move_point_action)
 
+        self.show_convex_hull_action = QtWidgets.QAction("Show convex hull", parent)
+        self.show_convex_hull_action.triggered.connect(
+            self.show_convex_hull_action_triggered)
+        self.show_convex_hull_action.setCheckable(True)
+        self.toolbar.addAction(self.show_convex_hull_action)
+
     def move_point_action_triggered(self, state):
         if state:
             self.model.state = MovePointState(curve=self)
         else:
             self.model.state = DefaultState()
 
+    def show_convex_hull_action_triggered(self, state):
+        if self.show_convex_hull != state:
+            self.show_convex_hull = state
+            self.model.updated()
+            logger.info(f'Convex hull: {state}')
 
     def calculate_points(self):
+        super().calculate_points()
+
         if not self.nodes:
             self.points = []
             return self.points
@@ -105,3 +121,7 @@ class BezierCurve(Curve):
         for point in self.points:
             qp.drawLine(oldPoint[0], oldPoint[1], point[0], point[1])
             oldPoint = point
+
+        if self.show_convex_hull:
+            logger.info("Drawing convex hull")
+            self.draw_convex_hull(qp)

@@ -1,11 +1,8 @@
-from PyQt5.QtCore import QAbstractListModel, Qt
-from PyQt5 import QtGui, QtCore, QtWidgets
-
-import math
 import json
-import numpy as np
 
-from .curves import Curve, BezierCurve, PolygonalCurve
+from PyQt5.QtCore import QAbstractListModel, Qt
+
+from .curves import Curve
 from .states import DefaultState
 
 
@@ -14,11 +11,20 @@ class CurvesModel(QAbstractListModel):
         super().__init__(*args, **kwargs)
         self.curves = curves or []
 
-        self.state = DefaultState()
+        self.__state = DefaultState()
         self.parent = parent
 
         self.selected_curve = None
         self.selected_curve_index = None
+
+    @property
+    def state(self):
+        return self.__state
+
+    @state.setter
+    def state(self, s):
+        self.__state.disable()
+        self.__state = s
 
     def add(self, curve: Curve, selected=False):
         curve.setup_toolbar(self.parent)

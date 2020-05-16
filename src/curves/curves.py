@@ -1,6 +1,7 @@
-from PyQt5 import QtGui, QtWidgets
-
 import numpy as np
+from PyQt5 import QtGui, QtWidgets, QtCore
+from scipy.spatial import ConvexHull
+
 from src.states import AddPointState, DefaultState
 
 
@@ -8,6 +9,7 @@ class Curve(object):
     def __init__(self, name, nodes=None, model=None):
         self.nodes = nodes or []
         self.points = []
+        self.convex_hull = []
 
         self.name = name
         self.type = "Base Curve"
@@ -16,6 +18,7 @@ class Curve(object):
         self.hidden = False
 
         self.show_control_points = False
+        self.show_convex_hull = False
 
         self.color = "blue"
 
@@ -47,7 +50,7 @@ class Curve(object):
 
     def add_point_action_triggered(self, state):
         if state:
-            self.model.state = AddPointState(curve=self)
+            self.model.state = AddPointState(self)
         else:
             self.model.state = DefaultState()
 
@@ -57,10 +60,14 @@ class Curve(object):
             self.model.updated()
 
     def calculate_points(self):
-        raise NotImplementedError
+        if len(self.nodes) >= 3:
+            hull = ConvexHull(self.nodes)
+            self.convex_hull = [self.nodes[i] for i in hull.vertices]
+        else:
+            self.convex_hull = []
 
     def distance_to_nearest_point(self, x, y):
-        dists = [np.sqrt((x - px)**2 + (y - py)**2) for px, py in self.points]
+        dists = [np.sqrt((x - px) ** 2 + (y - py) ** 2) for px, py in self.points]
 
         if dists:
             return min(dists)
@@ -68,13 +75,25 @@ class Curve(object):
         return np.inf
 
     def nearest_node(self, x, y):
-        dists = [(np.sqrt((x - px)**2 + (y - py)**2), i) for i, (px, py) in enumerate(self.nodes)]
+        dists = [(np.sqrt((x - px) ** 2 + (y - py) ** 2), i) for i, (px, py) in enumerate(self.nodes)]
 
         if dists:
             dist, index = min(dists)
             return index, dist
 
         return None, None
+
+    def draw_convex_hull(self, qp: QtGui.QPainter):
+        points = self.convex_hull
+        if len(points) < 2:
+            return
+
+        greenPen = QtGui.QPen(QtCore.Qt.green, 1, QtCore.Qt.DashLine)
+        qp.setPen(greenPen)
+        for i in range(len(points)-1):
+            qp.drawLine(points[i][0], points[i][1], points[i+1][0], points[i+1][1])
+
+        qp.drawLine(points[-1][0], points[-1][1], points[0][0], points[0][1])
 
     def draw(self, qp: QtGui.QPainter):
         if self.hidden or not self.nodes:
