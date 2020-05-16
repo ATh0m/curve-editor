@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger('curve-editor')
+
 import math
 import sys
 
@@ -5,7 +8,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt
 
 from .model import CurvesModel
-from .states import SelectCurveState, DefaultState, AddPointState
+from .states import SelectCurveState, DefaultState, AddPointState, MovePointState
 
 
 class Canvas(QtWidgets.QGraphicsPixmapItem):
@@ -21,14 +24,18 @@ class Canvas(QtWidgets.QGraphicsPixmapItem):
     def mousePressEvent(self, ev) -> None:
         x, y = ev.pos().x(), ev.pos().y()
 
+        logger.info(f"START: ({x}, {y})")
+
         if isinstance(self.model.state, SelectCurveState):
-            print('selecting')
+            logger.info('selecting')
 
             index, dist = self.model.distance_to_nearest_curve(x, y)
-            print(index, dist)
+            logger.info(index, dist)
             if dist is not None and dist < 10:
                 self.model.select(index)
-                print(f'Selected curve: {index}')
+                logger.info(f'Selected curve: {index}')
+            else:
+                self.model.deselect()
 
             self.model.state = self.model.state.nextState()
 
@@ -38,6 +45,34 @@ class Canvas(QtWidgets.QGraphicsPixmapItem):
             curve.calculate_points()
 
             self.model.layoutChanged.emit()
+
+        elif isinstance(self.model.state, MovePointState):
+            curve = self.model.state.curve
+            
+            index, dist = curve.nearest_node(x, y)
+
+            if dist is not None and dist < 10:
+                self.model.state.selected_point = index
+            
+    def mouseMoveEvent(self, ev) -> None:
+        x, y = ev.pos().x(), ev.pos().y()
+        # logger.info(f"MOVE: ({x}, {y})")
+
+        if isinstance(self.model.state, MovePointState):
+            if self.model.state.selected_point is not None:
+                curve = self.model.state.curve
+                index = self.model.state.selected_point
+
+                curve.nodes[index] = (x, y)
+                curve.calculate_points()
+                self.model.updated()
+
+    def mouseReleaseEvent(self, event: 'QGraphicsSceneMouseEvent') -> None:
+        x, y = event.pos().x(), event.pos().y()
+        logger.info(f"RELEASE: ({x}, {y})")
+
+        if isinstance(self.model.state, MovePointState):
+            self.model.state.selected_point = None
 
     def draw(self):
         pixmap = QtGui.QPixmap(930, 690)
@@ -51,9 +86,9 @@ class Canvas(QtWidgets.QGraphicsPixmapItem):
 
         qp.end()
         self.setPixmap(pixmap)
-        print('Updated')
+        logger.info('Updated')
 
     def screenshot(self, filename):
         self.pixmap().save(filename)
 
-        print('OK')
+        logger.info('OK')

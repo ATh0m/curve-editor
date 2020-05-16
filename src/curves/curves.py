@@ -67,6 +67,15 @@ class Curve(object):
 
         return np.inf
 
+    def nearest_node(self, x, y):
+        dists = [(np.sqrt((x - px)**2 + (y - py)**2), i) for i, (px, py) in enumerate(self.nodes)]
+
+        if dists:
+            dist, index = min(dists)
+            return index, dist
+
+        return None, None
+
     def draw(self, qp: QtGui.QPainter):
         if self.hidden or not self.nodes:
             return

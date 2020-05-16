@@ -1,9 +1,10 @@
 from PyQt5.QtCore import QAbstractListModel, Qt
-from PyQt5 import QtGui, QtCore
+from PyQt5 import QtGui, QtCore, QtWidgets
 
 import math
 
 from .curves import Curve
+from src.states import AddPointState, DefaultState, MovePointState
 
 
 class BezierCurve(Curve):
@@ -40,6 +41,22 @@ class BezierCurve(Curve):
         for i in range(n):
             t = i / float(n - 1)
             yield BezierCurve.bezier(t, nodes)
+
+    def setup_toolbar(self, parent):
+        super().setup_toolbar(parent)
+
+        self.move_point_action = QtWidgets.QAction("Move point", parent)
+        self.move_point_action.triggered.connect(
+            self.move_point_action_triggered)
+        self.move_point_action.setCheckable(True)
+        self.toolbar.addAction(self.move_point_action)
+
+    def move_point_action_triggered(self, state):
+        if state:
+            self.model.state = MovePointState(curve=self)
+        else:
+            self.model.state = DefaultState()
+
 
     def calculate_points(self):
         if not self.nodes:

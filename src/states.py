@@ -17,3 +17,11 @@ class AddPointState(DefaultState):
         super().__init__()
 
         self.curve = curve
+
+
+class MovePointState(DefaultState):
+    def __init__(self, curve):
+        super().__init__()
+
+        self.curve = curve
+        self.selected_point = None

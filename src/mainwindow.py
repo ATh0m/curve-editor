@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger('curve-editor')
+
 import json
 import pickle
 
@@ -58,7 +61,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.add_toolbar()
 
     def model_changed(self):
-        print('Update window')
+        logger.info('Update window')
 
         if self.selected_curve is not self.model.selected_curve:
             if self.selected_curve is not None:
@@ -72,7 +75,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.addToolBar(Qt.TopToolBarArea,
                                     self.selected_curve.toolbar)
                     self.selected_curve.toolbar.show()
-                    print("Added toolbar")
+                    logger.info("Added toolbar")
 
     def new_bezier_action_triggered(self):
         curve = BezierCurve('')
@@ -81,7 +84,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         curve.add_point_action.trigger()
 
     def select_curve_action(self, state):
-        print("select curve mode")
+        logger.info("select curve mode")
         self.model.state = SelectCurveState()
         pass
 
@@ -105,7 +108,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def curve_selected(self, index):
         index = index.row()
-        print(index)
+        logger.info(index)
 
         self.model.select(index)
 
