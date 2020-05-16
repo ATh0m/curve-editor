@@ -6,7 +6,7 @@ from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtCore import Qt
 
 from .model import CurvesModel
-from .states import SelectCurveState, AddPointState, MovePointState, RemoveCurveState
+from .states import SelectCurveState, AddNodeState, MoveNodeState, RemoveCurveState, RemoveNodeState
 
 
 class Canvas(QtWidgets.QGraphicsPixmapItem):
@@ -36,7 +36,7 @@ class Canvas(QtWidgets.QGraphicsPixmapItem):
             else:
                 self.model.deselect()
 
-            self.model.state = self.model.state.nextState()
+            self.model.state = self.model.state.next_state()
 
         elif isinstance(self.model.state, RemoveCurveState):
             logger.info('removing')
@@ -47,16 +47,29 @@ class Canvas(QtWidgets.QGraphicsPixmapItem):
                 self.model.remove_curve(index)
                 logger.info(f'Remove curve: {index}')
 
-            self.model.state = self.model.state.nextState()
+            self.model.state = self.model.state.next_state()
 
-        elif isinstance(self.model.state, AddPointState):
+        elif isinstance(self.model.state, AddNodeState):
             curve = self.model.state.curve
             curve.nodes.append((x, y))
             curve.calculate_points()
 
             self.model.layoutChanged.emit()
 
-        elif isinstance(self.model.state, MovePointState):
+        elif isinstance(self.model.state, RemoveNodeState):
+            curve = self.model.state.curve
+
+            index, dist = curve.nearest_node(x, y)
+
+            if dist is not None and dist < 10:
+                curve.nodes.pop(index)
+
+                curve.calculate_points()
+                self.model.layoutChanged.emit()
+
+            self.model.state = self.model.state.next_state()
+
+        elif isinstance(self.model.state, MoveNodeState):
             curve = self.model.state.curve
 
             index, dist = curve.nearest_node(x, y)
@@ -68,7 +81,7 @@ class Canvas(QtWidgets.QGraphicsPixmapItem):
         x, y = ev.pos().x(), ev.pos().y()
         # logger.info(f"MOVE: ({x}, {y})")
 
-        if isinstance(self.model.state, MovePointState):
+        if isinstance(self.model.state, MoveNodeState):
             if self.model.state.selected_point is not None:
                 curve = self.model.state.curve
                 index = self.model.state.selected_point
@@ -81,7 +94,7 @@ class Canvas(QtWidgets.QGraphicsPixmapItem):
         x, y = event.pos().x(), event.pos().y()
         logger.info(f"RELEASE: ({x}, {y})")
 
-        if isinstance(self.model.state, MovePointState):
+        if isinstance(self.model.state, MoveNodeState):
             self.model.state.selected_point = None
 
     def draw(self):

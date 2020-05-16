@@ -4,7 +4,7 @@ class State(object):
 
 
 class DefaultState(State):
-    def nextState(self):
+    def next_state(self):
         return DefaultState()
 
     def disable(self):
@@ -19,17 +19,27 @@ class RemoveCurveState(DefaultState):
     pass
 
 
-class AddPointState(DefaultState):
+class AddNodeState(DefaultState):
     def __init__(self, curve):
         super().__init__()
 
         self.curve = curve
 
     def disable(self):
-        self.curve.add_point_action.setChecked(False)
+        self.curve.add_node_action.setChecked(False)
 
 
-class MovePointState(DefaultState):
+class RemoveNodeState(DefaultState):
+    def __init__(self, curve):
+        super().__init__()
+
+        self.curve = curve
+
+    def disable(self):
+        self.curve.remove_node_action.setChecked(False)
+
+
+class MoveNodeState(DefaultState):
     def __init__(self, curve):
         super().__init__()
 
@@ -37,4 +47,4 @@ class MovePointState(DefaultState):
         self.selected_point = None
 
     def disable(self):
-        self.curve.move_point_action.setChecked(False)
+        self.curve.move_node_action.setChecked(False)

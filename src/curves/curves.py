@@ -2,7 +2,7 @@ import numpy as np
 from PyQt5 import QtGui, QtWidgets, QtCore
 from scipy.spatial import ConvexHull
 
-from src.states import AddPointState, DefaultState
+from src.states import AddNodeState, DefaultState, RemoveNodeState, MoveNodeState
 
 
 class Curve(object):
@@ -35,26 +35,50 @@ class Curve(object):
     def setup_toolbar(self, parent):
         self.toolbar = QtWidgets.QToolBar()
 
-        self.add_point_action = QtWidgets.QAction("Add point", parent)
-        self.add_point_action.triggered.connect(
-            self.add_point_action_triggered)
-        self.add_point_action.setCheckable(True)
-        self.toolbar.addAction(self.add_point_action)
+        self.add_node_action = QtWidgets.QAction("Add node", parent)
+        self.add_node_action.triggered.connect(
+            self.add_node_action_triggered)
+        self.add_node_action.setCheckable(True)
+        self.toolbar.addAction(self.add_node_action)
 
-        show_control_points_action = QtWidgets.QAction("Control points",
-                                                       parent)
-        show_control_points_action.triggered.connect(
-            self.show_control_points_action_triggered)
-        show_control_points_action.setCheckable(True)
-        self.toolbar.addAction(show_control_points_action)
+        self.remove_node_action = QtWidgets.QAction("Remove node", parent)
+        self.remove_node_action.triggered.connect(
+            self.remove_node_action_triggered)
+        self.remove_node_action.setCheckable(True)
+        self.toolbar.addAction(self.remove_node_action)
 
-    def add_point_action_triggered(self, state):
+        self.move_node_action = QtWidgets.QAction("Move node", parent)
+        self.move_node_action.triggered.connect(
+            self.move_node_action_triggered)
+        self.move_node_action.setCheckable(True)
+        self.toolbar.addAction(self.move_node_action)
+
+        show_nodes_action = QtWidgets.QAction("Show nodes",
+                                              parent)
+        show_nodes_action.triggered.connect(
+            self.show_nodes_action_triggered)
+        show_nodes_action.setCheckable(True)
+        self.toolbar.addAction(show_nodes_action)
+
+    def add_node_action_triggered(self, state):
         if state:
-            self.model.state = AddPointState(self)
+            self.model.state = AddNodeState(self)
         else:
             self.model.state = DefaultState()
 
-    def show_control_points_action_triggered(self, state):
+    def remove_node_action_triggered(self, state):
+        if state:
+            self.model.state = RemoveNodeState(self)
+        else:
+            self.model.state = DefaultState()
+
+    def move_node_action_triggered(self, state):
+        if state:
+            self.model.state = MoveNodeState(curve=self)
+        else:
+            self.model.state = DefaultState()
+
+    def show_nodes_action_triggered(self, state):
         if state != self.show_control_points:
             self.show_control_points = state
             self.model.updated()

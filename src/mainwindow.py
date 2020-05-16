@@ -78,7 +78,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         curve = BezierCurve('')
         self.model.add(curve, selected=True)
 
-        curve.add_point_action.trigger()
+        curve.add_node_action.trigger()
 
     def select_curve_action_triggered(self, state):
         logger.info("select curve mode")

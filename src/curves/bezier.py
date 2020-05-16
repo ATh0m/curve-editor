@@ -6,7 +6,7 @@ import math
 
 from PyQt5 import QtGui, QtCore, QtWidgets
 
-from src.states import DefaultState, MovePointState
+from src.states import DefaultState, MoveNodeState
 from .curves import Curve
 
 
@@ -48,23 +48,11 @@ class BezierCurve(Curve):
     def setup_toolbar(self, parent):
         super().setup_toolbar(parent)
 
-        self.move_point_action = QtWidgets.QAction("Move point", parent)
-        self.move_point_action.triggered.connect(
-            self.move_point_action_triggered)
-        self.move_point_action.setCheckable(True)
-        self.toolbar.addAction(self.move_point_action)
-
         self.show_convex_hull_action = QtWidgets.QAction("Show convex hull", parent)
         self.show_convex_hull_action.triggered.connect(
             self.show_convex_hull_action_triggered)
         self.show_convex_hull_action.setCheckable(True)
         self.toolbar.addAction(self.show_convex_hull_action)
-
-    def move_point_action_triggered(self, state):
-        if state:
-            self.model.state = MovePointState(curve=self)
-        else:
-            self.model.state = DefaultState()
 
     def show_convex_hull_action_triggered(self, state):
         if self.show_convex_hull != state:
