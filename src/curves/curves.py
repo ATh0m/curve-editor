@@ -27,7 +27,7 @@ class Curve(object):
         self.toolbar = None
 
     def __repr__(self):
-        return f"{self.name} | {self.type} | {len(self.nodes)} nodes"
+        return f"{self.type} | {len(self.nodes)} nodes"
 
     def setModel(self, model):
         self.model = model
@@ -53,12 +53,18 @@ class Curve(object):
         self.move_node_action.setCheckable(True)
         self.toolbar.addAction(self.move_node_action)
 
-        show_nodes_action = QtWidgets.QAction("Show nodes",
+        self.show_nodes_action = QtWidgets.QAction("Show nodes",
                                               parent)
-        show_nodes_action.triggered.connect(
+        self.show_nodes_action.triggered.connect(
             self.show_nodes_action_triggered)
-        show_nodes_action.setCheckable(True)
-        self.toolbar.addAction(show_nodes_action)
+        self.show_nodes_action.setCheckable(True)
+        self.toolbar.addAction(self.show_nodes_action)
+
+        self.visibility_action = QtWidgets.QAction("Show/hide", parent)
+        self.visibility_action.triggered.connect(
+            self.visibility_action_triggered)
+        self.visibility_action.setCheckable(True)
+        self.toolbar.addAction(self.visibility_action)
 
     def add_node_action_triggered(self, state):
         if state:
@@ -81,6 +87,11 @@ class Curve(object):
     def show_nodes_action_triggered(self, state):
         if state != self.show_control_points:
             self.show_control_points = state
+            self.model.updated()
+
+    def visibility_action_triggered(self, state):
+        if state != self.hidden:
+            self.hidden = state
             self.model.updated()
 
     def calculate_points(self):

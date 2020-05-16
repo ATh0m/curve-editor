@@ -43,7 +43,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.canvas.setModel(self.model)
 
         self.listView.setModel(self.model)
-        self.listView.doubleClicked['QModelIndex'].connect(self.curve_details)
+        # self.listView.doubleClicked['QModelIndex'].connect(self.curve_details)
         self.listView.clicked['QModelIndex'].connect(self.curve_selected)
 
         scene = QtWidgets.QGraphicsScene()
