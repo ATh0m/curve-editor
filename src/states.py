@@ -173,7 +173,7 @@ class ChangeNodesOrderState(DefaultState):
     def __init__(self, curve, mode, controller=None):
         super().__init__()
 
-        self.mode = mode # swap, before, after
+        self.mode = mode  # swap, before, after
         self.controller = controller
 
         self.curve = curve

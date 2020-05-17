@@ -7,6 +7,7 @@ from PyQt5.QtCore import Qt
 
 from .model import CurvesModel
 
+
 class Canvas(QtWidgets.QGraphicsPixmapItem):
     """ Canvas for drawing"""
 

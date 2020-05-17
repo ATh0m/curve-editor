@@ -6,7 +6,6 @@ import math
 
 from PyQt5 import QtGui, QtCore, QtWidgets
 
-from src.states import DefaultState, MoveNodeState
 from .curves import Curve
 
 

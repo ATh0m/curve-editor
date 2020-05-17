@@ -4,7 +4,7 @@ logger = logging.getLogger('curve-editor')
 
 import numpy as np
 from PyQt5 import QtGui, QtWidgets, QtCore
-from PyQt5.QtWidgets import QInputDialog, QLineEdit, QColorDialog
+from PyQt5.QtWidgets import QInputDialog, QColorDialog
 
 from scipy.spatial import ConvexHull
 
@@ -75,15 +75,15 @@ class Curve(object):
         self.swap_nodes_action.setCheckable(True)
         self.toolbar.addAction(self.swap_nodes_action)
 
-        self.insert_node_before_action = QtWidgets.QAction("Insert node before",
-                                                   parent)
+        self.insert_node_before_action = QtWidgets.QAction("Move node before",
+                                                           parent)
         self.insert_node_before_action.triggered.connect(
             self.insert_node_before_action_triggered)
         self.insert_node_before_action.setCheckable(True)
         self.toolbar.addAction(self.insert_node_before_action)
 
-        self.insert_node_after_action = QtWidgets.QAction("Insert node after",
-                                                   parent)
+        self.insert_node_after_action = QtWidgets.QAction("Move node after",
+                                                          parent)
         self.insert_node_after_action.triggered.connect(
             self.insert_node_after_action_triggered)
         self.insert_node_after_action.setCheckable(True)
@@ -190,7 +190,7 @@ class Curve(object):
         color = QColorDialog().getColor(self.color,
                                         parent=self.model.parent,
                                         title="Select color")
-        
+
         if color != self.color:
             logger.info(f"Changed color: {color}")
             self.color = color
@@ -253,9 +253,9 @@ class Curve(object):
         if len(points) < 2:
             return
 
-        for i in range(len(points)-1):
+        for i in range(len(points) - 1):
             x, y = points[i]
-            next_x, next_y = points[i+1]
+            next_x, next_y = points[i + 1]
 
             qp.drawLine(x, y, next_x, next_y)
 
@@ -277,13 +277,13 @@ class Curve(object):
     def draw(self, qp: QtGui.QPainter):
         if self.hidden or not self.nodes:
             return
-        
+
         if self.show_nodes:
             logger.info("Drawing nodes")
             self.draw_nodes(qp)
-            
+
         self.draw_points(qp)
-        
+
         if self.show_convex_hull:
             logger.info("Drawing convex hull")
             self.draw_convex_hull(qp)

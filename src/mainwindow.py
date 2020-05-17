@@ -6,22 +6,12 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 
 from .canvas import Canvas
-from .curvedetails import CurveDetails
 from .curves import BezierCurve, PolygonalCurve
 from .model import CurvesModel
 
 from .states import SelectCurveState, RemoveCurveState, MoveCurveState
 
 from .ui.MainWindow import Ui_MainWindow
-from .ui.NewCurve import Ui_NewCurve
-
-
-class NewCurveDialog(QtWidgets.QDialog, Ui_NewCurve):
-    def __init__(self, *args, obj=None, **kwargs):
-        super(NewCurveDialog, self).__init__(*args, **kwargs)
-        self.setupUi(self)
-
-        self.typesList.addItems(["Bezier Curve", "Polygonal Curve"])
 
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -43,18 +33,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.canvas.setModel(self.model)
 
         self.listView.setModel(self.model)
-        # self.listView.doubleClicked['QModelIndex'].connect(self.curve_details)
         self.listView.clicked['QModelIndex'].connect(self.curve_selected)
 
         scene = QtWidgets.QGraphicsScene()
         scene.addItem(self.canvas)
         self.graphicsView.setScene(scene)
 
-        self.addCurve.clicked.connect(self.add_new_curve)
-        self.removeCurve.clicked.connect(self.remove_curve)
-
         self.model.updated()
-
         self.add_toolbar()
 
     def model_changed(self):
@@ -75,7 +60,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     logger.info("Added toolbar")
 
     def new_bezier_action_triggered(self):
-        curve = BezierCurve('')
+        curve = BezierCurve("")
+        self.model.add(curve, selected=True)
+
+        curve.add_node_action.trigger()
+
+    def new_polygonal_action_triggered(self):
+        curve = PolygonalCurve("")
         self.model.add(curve, selected=True)
 
         curve.add_node_action.trigger()
@@ -88,8 +79,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         new_bezier_action = QtWidgets.QAction("New Bezier", self)
         # button_action.setStatusTip("This is your button")
         new_bezier_action.triggered.connect(self.new_bezier_action_triggered)
-        # new_bezier_action.setCheckable(True)
         self.toolBar.addAction(new_bezier_action)
+
+        new_polygonal_action = QtWidgets.QAction("New Polygonal", self)
+        # button_action.setStatusTip("This is your button")
+        new_polygonal_action.triggered.connect(self.new_polygonal_action_triggered)
+        self.toolBar.addAction(new_polygonal_action)
 
         select_action = QtWidgets.QAction("Select curve", self)
         select_action.triggered.connect(self.select_curve_action_triggered)
@@ -105,30 +100,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # self.addToolBarBreak()
 
-    def curve_details(self, index):
-        details = CurveDetails(index.row(), parent=self)
-        details.setModel(self.model)
-        details.show()
-
     def curve_selected(self, index):
         index = index.row()
         logger.info(index)
 
         self.model.select(index)
-
-    def add_new_curve(self):
-        dialog = NewCurveDialog(parent=self)
-        if dialog.exec_():
-            name = dialog.name_line.text()
-            type_ = dialog.typesList.currentText()
-
-            if type_ == 'Bezier Curve':
-                curve = BezierCurve.from_dict({"name": name, "type": type_})
-            else:
-                curve = PolygonalCurve.from_dict({"name": name, "type": type_})
-
-            self.model.add(curve)
-            self.model.layoutChanged.emit()
 
     def remove_curve_action_triggered(self, state):
         logger.info("remove curve mode")
@@ -137,9 +113,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def move_curve_action_triggered(self, state):
         logger.info("move curve mode")
         self.model.state = MoveCurveState()
-
-    def remove_curve(self):
-        self.model.remove_selected()
 
     def screenshot(self):
         options = QtWidgets.QFileDialog.Options()
