@@ -10,7 +10,7 @@ from .curvedetails import CurveDetails
 from .curves import BezierCurve, PolygonalCurve
 from .model import CurvesModel
 
-from .states import SelectCurveState, RemoveCurveState
+from .states import SelectCurveState, RemoveCurveState, MoveCurveState
 
 from .ui.MainWindow import Ui_MainWindow
 from .ui.NewCurve import Ui_NewCurve
@@ -99,6 +99,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         remove_curve_action.triggered.connect(self.remove_curve_action_triggered)
         self.toolBar.addAction(remove_curve_action)
 
+        move_curve_action = QtWidgets.QAction("Move curve", self)
+        move_curve_action.triggered.connect(self.move_curve_action_triggered)
+        self.toolBar.addAction(move_curve_action)
+
         # self.addToolBarBreak()
 
     def curve_details(self, index):
@@ -129,6 +133,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def remove_curve_action_triggered(self, state):
         logger.info("remove curve mode")
         self.model.state = RemoveCurveState()
+
+    def move_curve_action_triggered(self, state):
+        logger.info("move curve mode")
+        self.model.state = MoveCurveState()
 
     def remove_curve(self):
         self.model.remove_selected()

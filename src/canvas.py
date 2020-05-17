@@ -6,7 +6,7 @@ from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtCore import Qt
 
 from .model import CurvesModel
-from .states import SelectCurveState, AddNodeState, MoveNodeState, RemoveCurveState, RemoveNodeState
+from .states import SelectCurveState, AddNodeState, MoveNodeState, RemoveCurveState, RemoveNodeState, MoveCurveState
 
 
 class Canvas(QtWidgets.QGraphicsPixmapItem):
@@ -49,6 +49,14 @@ class Canvas(QtWidgets.QGraphicsPixmapItem):
 
             self.model.state = self.model.state.next_state()
 
+        elif isinstance(self.model.state, MoveCurveState):
+            index, dist = self.model.distance_to_nearest_curve(x, y)
+            if dist is not None and dist < 10:
+                self.model.state.curve = self.model.curves[index]
+                self.model.state.last_position = (x, y)
+            else:
+                self.model.state = self.model.state.next_state()
+
         elif isinstance(self.model.state, AddNodeState):
             curve = self.model.state.curve
             curve.nodes.append((x, y))
@@ -90,12 +98,26 @@ class Canvas(QtWidgets.QGraphicsPixmapItem):
                 curve.calculate_points()
                 self.model.updated()
 
+        elif isinstance(self.model.state, MoveCurveState):
+            if self.model.state.curve is not None:
+                curve = self.model.state.curve
+                last_x, last_y = self.model.state.last_position
+
+                dx, dy = x - last_x, y - last_y
+                curve.translate(dx, dy)
+                self.model.updated()
+
+                self.model.state.last_position = (x, y)
+
     def mouseReleaseEvent(self, event: 'QGraphicsSceneMouseEvent') -> None:
         x, y = event.pos().x(), event.pos().y()
         logger.info(f"RELEASE: ({x}, {y})")
 
         if isinstance(self.model.state, MoveNodeState):
             self.model.state.selected_point = None
+
+        elif isinstance(self.model.state, MoveCurveState):
+            self.model.state = self.model.state.next_state()
 
     def draw(self):
         pixmap = QtGui.QPixmap(930, 690)

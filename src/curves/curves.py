@@ -1,5 +1,11 @@
+import logging
+
+logger = logging.getLogger('curve-editor')
+
 import numpy as np
 from PyQt5 import QtGui, QtWidgets, QtCore
+from PyQt5.QtWidgets import QInputDialog, QLineEdit
+
 from scipy.spatial import ConvexHull
 
 from src.states import AddNodeState, DefaultState, RemoveNodeState, MoveNodeState
@@ -54,7 +60,7 @@ class Curve(object):
         self.toolbar.addAction(self.move_node_action)
 
         self.show_nodes_action = QtWidgets.QAction("Show nodes",
-                                              parent)
+                                                   parent)
         self.show_nodes_action.triggered.connect(
             self.show_nodes_action_triggered)
         self.show_nodes_action.setCheckable(True)
@@ -65,6 +71,16 @@ class Curve(object):
             self.visibility_action_triggered)
         self.visibility_action.setCheckable(True)
         self.toolbar.addAction(self.visibility_action)
+
+        self.rotate_action = QtWidgets.QAction("Rotate", parent)
+        self.rotate_action.triggered.connect(
+            self.rotate_action_triggered)
+        self.toolbar.addAction(self.rotate_action)
+
+        self.scale_action = QtWidgets.QAction("Scale", parent)
+        self.scale_action.triggered.connect(
+            self.scale_action_triggered)
+        self.toolbar.addAction(self.scale_action)
 
     def add_node_action_triggered(self, state):
         if state:
@@ -92,6 +108,31 @@ class Curve(object):
     def visibility_action_triggered(self, state):
         if state != self.hidden:
             self.hidden = state
+            self.model.updated()
+
+    def rotate_action_triggered(self, state):
+        theta, ok = QInputDialog().getDouble(self.model.parent,
+                                             "Rotate curve",
+                                             "Degrees:",
+                                             value=0.0,
+                                             min=0.0,
+                                             max=360.0)
+        if ok:
+            logger.info(f"Rotate curve: {theta}")
+            self.rotate(theta)
+            self.model.updated()
+
+    def scale_action_triggered(self, state):
+        scale, ok = QInputDialog().getDouble(self.model.parent,
+                                             "Scale curve",
+                                             "Scale:",
+                                             value=1.0,
+                                             min=0.0,
+                                             max=10.0,
+                                             decimals=2)
+        if ok:
+            logger.info(f"Scale curve: {scale}")
+            self.scale(scale)
             self.model.updated()
 
     def calculate_points(self):
@@ -125,8 +166,8 @@ class Curve(object):
 
         greenPen = QtGui.QPen(QtCore.Qt.green, 1, QtCore.Qt.DashLine)
         qp.setPen(greenPen)
-        for i in range(len(points)-1):
-            qp.drawLine(points[i][0], points[i][1], points[i+1][0], points[i+1][1])
+        for i in range(len(points) - 1):
+            qp.drawLine(points[i][0], points[i][1], points[i + 1][0], points[i + 1][1])
 
         qp.drawLine(points[-1][0], points[-1][1], points[0][0], points[0][1])
 

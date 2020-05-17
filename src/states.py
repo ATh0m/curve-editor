@@ -19,6 +19,14 @@ class RemoveCurveState(DefaultState):
     pass
 
 
+class MoveCurveState(DefaultState):
+    def __init__(self):
+        super().__init__()
+
+        self.curve = None
+        self.last_position = None
+
+
 class AddNodeState(DefaultState):
     def __init__(self, curve):
         super().__init__()
