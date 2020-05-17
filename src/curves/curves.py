@@ -27,6 +27,7 @@ class Curve(object):
         self.show_convex_hull = False
 
         self.color = QtCore.Qt.blue
+        self.width = 1.0
 
         self.model = model
 
@@ -86,6 +87,11 @@ class Curve(object):
         self.line_color_action.triggered.connect(
             self.line_color_action_triggered)
         self.toolbar.addAction(self.line_color_action)
+
+        self.line_width_action = QtWidgets.QAction("Line width", parent)
+        self.line_width_action.triggered.connect(
+            self.line_width_action_triggered)
+        self.toolbar.addAction(self.line_width_action)
 
     def add_node_action_triggered(self, state):
         if state:
@@ -150,6 +156,19 @@ class Curve(object):
             self.color = color
             self.model.updated()
 
+    def line_width_action_triggered(self):
+        width, ok = QInputDialog().getDouble(self.model.parent,
+                                             "Curve width",
+                                             "Width:",
+                                             value=self.width,
+                                             min=0.1,
+                                             max=100.0,
+                                             decimals=1)
+        if ok and width != self.width:
+            logger.info(f"Curve width: {width}")
+            self.width = width
+            self.model.updated()
+
     def calculate_points(self):
         if len(self.nodes) >= 3:
             hull = ConvexHull(self.nodes)
@@ -187,7 +206,7 @@ class Curve(object):
         qp.drawLine(points[-1][0], points[-1][1], points[0][0], points[0][1])
 
     def draw_points(self, qp: QtGui.QPainter):
-        pen = QtGui.QPen(self.color, 1, QtCore.Qt.SolidLine)
+        pen = QtGui.QPen(self.color, self.width, QtCore.Qt.SolidLine)
         qp.setPen(pen)
 
         points = self.points
