@@ -226,3 +226,21 @@ class ChangeNodesOrderState(DefaultState):
 
     def disable(self):
         self.controller.setChecked(False)
+
+
+class DuplicateCurveState(DefaultState):
+    def mousePressEvent(self, event, canvas):
+        x, y = event.pos().x(), event.pos().y()
+
+        index, dist = canvas.model.distance_to_nearest_curve(x, y)
+        logger.info(index, dist)
+        if dist is not None and dist < 10:
+            curve = canvas.model.curves[index]
+
+            new_curve = curve.clone()
+            new_curve.translate(20, 20)
+
+            canvas.model.add(new_curve, selected=True)
+            canvas.model.updated()
+
+        canvas.model.state = self.next_state()

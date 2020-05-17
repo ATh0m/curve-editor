@@ -9,7 +9,7 @@ from .canvas import Canvas
 from .curves import BezierCurve, PolygonalCurve
 from .model import CurvesModel
 
-from .states import SelectCurveState, RemoveCurveState, MoveCurveState
+from .states import SelectCurveState, RemoveCurveState, MoveCurveState, DuplicateCurveState
 
 from .ui.MainWindow import Ui_MainWindow
 
@@ -98,6 +98,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         move_curve_action.triggered.connect(self.move_curve_action_triggered)
         self.toolBar.addAction(move_curve_action)
 
+        duplicate_curve_action = QtWidgets.QAction("Duplicate curve", self)
+        duplicate_curve_action.triggered.connect(self.duplicate_curve_action_triggered)
+        self.toolBar.addAction(duplicate_curve_action)
+
         # self.addToolBarBreak()
 
     def curve_selected(self, index):
@@ -113,6 +117,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def move_curve_action_triggered(self, state):
         logger.info("move curve mode")
         self.model.state = MoveCurveState()
+
+    def duplicate_curve_action_triggered(self, state):
+        self.model.state = DuplicateCurveState()
 
     def screenshot(self):
         options = QtWidgets.QFileDialog.Options()

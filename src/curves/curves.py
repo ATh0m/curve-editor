@@ -3,6 +3,7 @@ import logging
 logger = logging.getLogger('curve-editor')
 
 import numpy as np
+import copy
 from PyQt5 import QtGui, QtWidgets, QtCore
 from PyQt5.QtWidgets import QInputDialog, QColorDialog
 
@@ -36,6 +37,9 @@ class Curve(object):
 
     def __repr__(self):
         return f"{self.type} | {len(self.nodes)} nodes"
+
+    def clone(self):
+        return copy.copy(self)
 
     def setModel(self, model):
         self.model = model
