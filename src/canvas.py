@@ -6,7 +6,8 @@ from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtCore import Qt
 
 from .model import CurvesModel
-from .states import SelectCurveState, AddNodeState, MoveNodeState, RemoveCurveState, RemoveNodeState, MoveCurveState
+from .states import SelectCurveState, AddNodeState, MoveNodeState, RemoveCurveState, \
+    RemoveNodeState, MoveCurveState, ChangeNodesOrderState
 
 
 class Canvas(QtWidgets.QGraphicsPixmapItem):
@@ -84,6 +85,25 @@ class Canvas(QtWidgets.QGraphicsPixmapItem):
 
             if dist is not None and dist < 10:
                 self.model.state.selected_point = index
+
+        elif isinstance(self.model.state, ChangeNodesOrderState):
+            state = self.model.state
+            curve = self.model.state.curve
+
+            index, dist = curve.nearest_node(x, y)
+
+            if dist is not None and dist < 10:
+                if state.first_node is None:
+                    state.first_node = index
+                else:
+                    state.second_node = index
+
+                    state.apply()
+                    self.model.updated()
+
+                    self.model.state = self.model.state.next_state()
+
+
 
     def mouseMoveEvent(self, ev) -> None:
         x, y = ev.pos().x(), ev.pos().y()

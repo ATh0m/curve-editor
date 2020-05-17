@@ -8,7 +8,8 @@ from PyQt5.QtWidgets import QInputDialog, QLineEdit, QColorDialog
 
 from scipy.spatial import ConvexHull
 
-from src.states import AddNodeState, DefaultState, RemoveNodeState, MoveNodeState
+from src.states import AddNodeState, DefaultState, RemoveNodeState, MoveNodeState, \
+    ChangeNodesOrderState
 
 
 class Curve(object):
@@ -67,6 +68,27 @@ class Curve(object):
         self.show_nodes_action.setCheckable(True)
         self.toolbar.addAction(self.show_nodes_action)
 
+        self.swap_nodes_action = QtWidgets.QAction("Swap nodes",
+                                                   parent)
+        self.swap_nodes_action.triggered.connect(
+            self.swap_nodes_action_triggered)
+        self.swap_nodes_action.setCheckable(True)
+        self.toolbar.addAction(self.swap_nodes_action)
+
+        self.insert_node_before_action = QtWidgets.QAction("Insert node before",
+                                                   parent)
+        self.insert_node_before_action.triggered.connect(
+            self.insert_node_before_action_triggered)
+        self.insert_node_before_action.setCheckable(True)
+        self.toolbar.addAction(self.insert_node_before_action)
+
+        self.insert_node_after_action = QtWidgets.QAction("Insert node after",
+                                                   parent)
+        self.insert_node_after_action.triggered.connect(
+            self.insert_node_after_action_triggered)
+        self.insert_node_after_action.setCheckable(True)
+        self.toolbar.addAction(self.insert_node_after_action)
+
         self.visibility_action = QtWidgets.QAction("Show/hide", parent)
         self.visibility_action.triggered.connect(
             self.visibility_action_triggered)
@@ -115,6 +137,24 @@ class Curve(object):
         if state != self.show_nodes:
             self.show_nodes = state
             self.model.updated()
+
+    def swap_nodes_action_triggered(self, state):
+        if state:
+            self.model.state = ChangeNodesOrderState(self, 'swap', self.swap_nodes_action)
+        else:
+            self.model.state = DefaultState()
+
+    def insert_node_before_action_triggered(self, state):
+        if state:
+            self.model.state = ChangeNodesOrderState(self, 'before', self.insert_node_before_action)
+        else:
+            self.model.state = DefaultState()
+
+    def insert_node_after_action_triggered(self, state):
+        if state:
+            self.model.state = ChangeNodesOrderState(self, 'after', self.insert_node_after_action)
+        else:
+            self.model.state = DefaultState()
 
     def visibility_action_triggered(self, state):
         if state != self.hidden:
