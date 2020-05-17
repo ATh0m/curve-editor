@@ -76,40 +76,25 @@ class BezierCurve(Curve):
         self.points = points
         return self.points
 
-    def draw(self, qp: QtGui.QPainter):
-        if self.hidden or not self.nodes:
-            return
+    def draw_nodes(self, qp: QtGui.QPainter):
+        black_pen = QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.DashLine)
+        red_pen = QtGui.QPen(QtCore.Qt.red, 1, QtCore.Qt.DashLine)
+        red_brush = QtGui.QBrush(QtCore.Qt.red)
 
-        blackPen = QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.DashLine)
-        redPen = QtGui.QPen(QtCore.Qt.red, 1, QtCore.Qt.DashLine)
-        bluePen = QtGui.QPen(QtCore.Qt.blue, 1, QtCore.Qt.DashLine)
-        greenPen = QtGui.QPen(QtCore.Qt.green, 1, QtCore.Qt.DashLine)
-        redBrush = QtGui.QBrush(QtCore.Qt.red)
+        old_point = self.nodes[0]
 
-        oldPoint = self.nodes[0]
+        qp.setPen(red_pen)
+        qp.setBrush(red_brush)
+        qp.drawEllipse(old_point[0] - 3, old_point[1] - 3, 6, 6)
 
-        if self.show_control_points:
-            qp.setPen(redPen)
-            qp.setBrush(redBrush)
-            qp.drawEllipse(oldPoint[0] - 3, oldPoint[1] - 3, 6, 6)
+        qp.drawText(old_point[0] + 5, old_point[1] - 3, '1')
+        for i, point in enumerate(self.nodes[1:]):
+            i += 2
+            qp.setPen(black_pen)
+            qp.drawLine(old_point[0], old_point[1], point[0], point[1])
 
-            qp.drawText(oldPoint[0] + 5, oldPoint[1] - 3, '1')
-            for i, point in enumerate(self.nodes[1:]):
-                i += 2
-                qp.setPen(blackPen)
-                qp.drawLine(oldPoint[0], oldPoint[1], point[0], point[1])
+            qp.setPen(red_pen)
+            qp.drawEllipse(point[0] - 3, point[1] - 3, 6, 6)
 
-                qp.setPen(redPen)
-                qp.drawEllipse(point[0] - 3, point[1] - 3, 6, 6)
-
-                qp.drawText(point[0] + 5, point[1] - 3, '%d' % i)
-                oldPoint = point
-
-        qp.setPen(bluePen)
-        for point in self.points:
-            qp.drawLine(oldPoint[0], oldPoint[1], point[0], point[1])
-            oldPoint = point
-
-        if self.show_convex_hull:
-            logger.info("Drawing convex hull")
-            self.draw_convex_hull(qp)
+            qp.drawText(point[0] + 5, point[1] - 3, '%d' % i)
+            old_point = point

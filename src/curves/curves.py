@@ -4,7 +4,7 @@ logger = logging.getLogger('curve-editor')
 
 import numpy as np
 from PyQt5 import QtGui, QtWidgets, QtCore
-from PyQt5.QtWidgets import QInputDialog, QLineEdit
+from PyQt5.QtWidgets import QInputDialog, QLineEdit, QColorDialog
 
 from scipy.spatial import ConvexHull
 
@@ -23,10 +23,10 @@ class Curve(object):
         self.selected = False
         self.hidden = False
 
-        self.show_control_points = False
+        self.show_nodes = False
         self.show_convex_hull = False
 
-        self.color = "blue"
+        self.color = QtCore.Qt.blue
 
         self.model = model
 
@@ -82,6 +82,11 @@ class Curve(object):
             self.scale_action_triggered)
         self.toolbar.addAction(self.scale_action)
 
+        self.line_color_action = QtWidgets.QAction("Line color", parent)
+        self.line_color_action.triggered.connect(
+            self.line_color_action_triggered)
+        self.toolbar.addAction(self.line_color_action)
+
     def add_node_action_triggered(self, state):
         if state:
             self.model.state = AddNodeState(self)
@@ -101,8 +106,8 @@ class Curve(object):
             self.model.state = DefaultState()
 
     def show_nodes_action_triggered(self, state):
-        if state != self.show_control_points:
-            self.show_control_points = state
+        if state != self.show_nodes:
+            self.show_nodes = state
             self.model.updated()
 
     def visibility_action_triggered(self, state):
@@ -133,6 +138,16 @@ class Curve(object):
         if ok:
             logger.info(f"Scale curve: {scale}")
             self.scale(scale)
+            self.model.updated()
+
+    def line_color_action_triggered(self):
+        color = QColorDialog().getColor(self.color,
+                                        parent=self.model.parent,
+                                        title="Select color")
+        
+        if color != self.color:
+            logger.info(f"Changed color: {color}")
+            self.color = color
             self.model.updated()
 
     def calculate_points(self):
@@ -171,9 +186,48 @@ class Curve(object):
 
         qp.drawLine(points[-1][0], points[-1][1], points[0][0], points[0][1])
 
+    def draw_points(self, qp: QtGui.QPainter):
+        pen = QtGui.QPen(self.color, 1, QtCore.Qt.SolidLine)
+        qp.setPen(pen)
+
+        points = self.points
+        if len(points) < 2:
+            return
+
+        for i in range(len(points)-1):
+            x, y = points[i]
+            next_x, next_y = points[i+1]
+
+            qp.drawLine(x, y, next_x, next_y)
+
+    def draw_nodes(self, qp: QtGui.QPainter):
+        red_pen = QtGui.QPen(QtCore.Qt.red, 1, QtCore.Qt.DashLine)
+        red_brush = QtGui.QBrush(QtCore.Qt.red)
+
+        qp.setPen(red_pen)
+        qp.setBrush(red_brush)
+
+        old_point = self.nodes[0]
+        qp.drawEllipse(old_point[0] - 3, old_point[1] - 3, 6, 6)
+        qp.drawText(old_point[0] + 5, old_point[1] - 3, '1')
+        for i, point in enumerate(self.nodes[1:]):
+            i += 2
+            qp.drawEllipse(point[0] - 3, point[1] - 3, 6, 6)
+            qp.drawText(point[0] + 5, point[1] - 3, '%d' % i)
+
     def draw(self, qp: QtGui.QPainter):
         if self.hidden or not self.nodes:
             return
+        
+        if self.show_nodes:
+            logger.info("Drawing nodes")
+            self.draw_nodes(qp)
+            
+        self.draw_points(qp)
+        
+        if self.show_convex_hull:
+            logger.info("Drawing convex hull")
+            self.draw_convex_hull(qp)
 
     def calculate_center(self):
         center = [0, 0]
