@@ -353,3 +353,4 @@ class Curve(object):
 
         curve.calculate_points()
         return curve
+
