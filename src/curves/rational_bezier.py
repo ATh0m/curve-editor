@@ -20,3 +20,8 @@ class RationalBezierCurve(BezierCurve):
 
         self.weights = []
         self.type = "Rational Bezier Curve"
+
+    def add_node(self, x, y):
+        self.nodes.append((x, y))
+        self.weight.append(1.0)
+        self.calculate_points(force=False)

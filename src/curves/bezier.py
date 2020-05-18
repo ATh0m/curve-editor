@@ -141,7 +141,7 @@ class BezierCurve(Curve):
     def de_casteljau(self, t):
         return tuple(self._de_casteljau(len(self.nodes) - 1, 0, t))
 
-    def calculate_points(self, force=False, fast=False):
+    def calculate_points(self, force=True, fast=False):
         super().calculate_points()
 
         if not self.nodes:

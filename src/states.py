@@ -133,9 +133,7 @@ class RemoveNodeState(DefaultState):
         index, dist = curve.nearest_node(x, y)
 
         if dist is not None and dist < 10:
-            curve.nodes.pop(index)
-
-            curve.calculate_points()
+            curve.remove_node(index)
             canvas.model.layoutChanged.emit()
 
         canvas.model.state = self.next_state()
@@ -172,8 +170,7 @@ class MoveNodeState(DefaultState):
             curve = self.curve
             index = self.selected_point
 
-            curve.nodes[index] = (x, y)
-
+            curve.move_node(index, x, y, calculate=False)
             curve.calculate_points(fast=True)
             canvas.model.updated()
 
@@ -219,35 +216,7 @@ class ChangeNodesOrderState(DefaultState):
                 canvas.model.state = self.next_state()
 
     def apply(self):
-        curve = self.curve
-
-        first_node = curve.nodes[self.first_node]
-        second_node = curve.nodes[self.second_node]
-
-        if self.mode == 'swap':
-            curve.nodes[self.first_node] = second_node
-            curve.nodes[self.second_node] = first_node
-
-            curve.calculate_points(force=True)
-
-        elif self.mode == 'before':
-            curve.nodes.insert(self.second_node, first_node)
-
-            if self.second_node <= self.first_node:
-                curve.nodes.pop(self.first_node + 1)
-            else:
-                curve.nodes.pop(self.first_node)
-
-            curve.calculate_points(force=True)
-        elif self.mode == 'after':
-            curve.nodes.insert(self.second_node + 1, first_node)
-
-            if self.second_node + 1 <= self.first_node:
-                curve.nodes.pop(self.first_node + 1)
-            else:
-                curve.nodes.pop(self.first_node)
-
-            curve.calculate_points(force=True)
+        self.curve.change_nodes_order(self.first_node, self.second_node, self.mode)
 
     def disable(self):
         self.controller.setChecked(False)

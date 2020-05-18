@@ -41,9 +41,47 @@ class Curve(object):
     def __repr__(self):
         return f"{self.type} | {len(self.nodes)} nodes"
 
-    def add_node(self, x, y):
+    def add_node(self, x, y, calculate=True):
         self.nodes.append((x, y))
-        self.calculate_points()
+        if calculate:
+            self.calculate_points()
+
+    def remove_node(self, index, calculate=True):
+        self.nodes.pop(index)
+        if calculate:
+            self.calculate_points()
+
+    def move_node(self, index, x, y, calculate=True):
+        self.nodes[index] = (x, y)
+        if calculate:
+            self.calculate_points()
+
+    def change_nodes_order(self, index1, index2, mode, calculate=True):
+        first_node = self.nodes[index1]
+        second_node = self.nodes[index2]
+
+        if mode == 'swap':
+            self.nodes[index1] = second_node
+            self.nodes[index2] = first_node
+
+        elif mode == 'before':
+            self.nodes.insert(index2, first_node)
+
+            if index2 <= index1:
+                self.nodes.pop(index1 + 1)
+            else:
+                self.nodes.pop(index1)
+
+        elif mode == 'after':
+            self.nodes.insert(index2 + 1, first_node)
+
+            if index2 + 1 <= index1:
+                self.nodes.pop(index1 + 1)
+            else:
+                self.nodes.pop(index1)
+
+        if calculate:
+            self.calculate_points()
 
     def clone(self):
         return copy.copy(self)
@@ -339,16 +377,17 @@ class Curve(object):
         if calculate:
             self.calculate_points()
 
-    def scale(self, scalar):
+    def scale(self, scalar, calculate=True):
         (cx, cy) = self.calculate_center()
 
         for i, (x, y) in enumerate(self.nodes):
             dx, dy = x - cx, y - cy
             self.nodes[i] = (cx + dx * scalar, cy + dy * scalar)
 
-        self.calculate_points()
+        if calculate:
+            self.calculate_points()
 
-    def rotate(self, theta):
+    def rotate(self, theta, calculate=True):
         theta = theta * np.pi / 180
 
         center = np.array(self.calculate_center()).reshape(2, 1)
@@ -360,9 +399,8 @@ class Curve(object):
         new_nodes = center + rotate_matrix.dot(nodes - center)
         self.nodes = [(x, y) for x, y in new_nodes.T]
 
-        print(nodes, new_nodes)
-
-        self.calculate_points()
+        if calculate:
+            self.calculate_points()
 
     def hide(self, state):
         self.hidden = state
