@@ -48,6 +48,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.selected_curve is not self.model.selected_curve:
             if self.selected_curve is not None:
                 self.removeToolBar(self.selected_curve.toolbar)
+                if self.selected_curve.extra_toolbar is not None:
+                    self.removeToolBar(self.selected_curve.extra_toolbar)
 
             self.selected_curve = self.model.selected_curve
 
@@ -57,6 +59,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.addToolBar(Qt.TopToolBarArea,
                                     self.selected_curve.toolbar)
                     self.selected_curve.toolbar.show()
+
+                    if self.selected_curve.extra_toolbar is not None:
+                        self.addToolBarBreak()
+                        self.addToolBar(Qt.TopToolBarArea,
+                                        self.selected_curve.extra_toolbar)
+                        self.selected_curve.extra_toolbar.show()
+
                     logger.info("Added toolbar")
 
     def new_bezier_action_triggered(self):

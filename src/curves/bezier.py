@@ -4,6 +4,7 @@ logger = logging.getLogger('curve-editor')
 
 import math
 import numpy as np
+from scipy.special import comb
 
 from PyQt5 import QtGui, QtCore, QtWidgets
 from PyQt5.QtWidgets import QInputDialog
@@ -52,16 +53,22 @@ class BezierCurve(Curve):
     def setup_toolbar(self, parent):
         super().setup_toolbar(parent)
 
+        self.extra_toolbar = QtWidgets.QToolBar()
+
         self.show_convex_hull_action = QtWidgets.QAction("Show convex hull", parent)
         self.show_convex_hull_action.triggered.connect(
             self.show_convex_hull_action_triggered)
         self.show_convex_hull_action.setCheckable(True)
-        self.toolbar.addAction(self.show_convex_hull_action)
+        self.extra_toolbar.addAction(self.show_convex_hull_action)
 
         self.split_curve_action = QtWidgets.QAction("Split curve", parent)
         self.split_curve_action.triggered.connect(self.split_curve_action_triggered)
         self.split_curve_action.setCheckable(True)
-        self.toolbar.addAction(self.split_curve_action)
+        self.extra_toolbar.addAction(self.split_curve_action)
+
+        self.raise_degree_action = QtWidgets.QAction("Raise degree", parent)
+        self.raise_degree_action.triggered.connect(self.raise_degree_action_triggered)
+        self.extra_toolbar.addAction(self.raise_degree_action)
 
     def show_convex_hull_action_triggered(self, state):
         if self.show_convex_hull != state:
@@ -74,6 +81,33 @@ class BezierCurve(Curve):
             self.model.state = SplitCurveState(self)
         else:
             self.model.state = DefaultState()
+
+    def raise_degree(self, m):
+        nodes = [np.array(node) for node in self.nodes]
+        n = len(nodes) - 1
+
+        new_nodes = []
+
+        for i in range(n + m + 1):
+            node = sum(nodes[k] * comb(n, k) * comb(m, i-k) * comb(n+m, i)**(-1)
+                       for k in range(max(0, i-m), min(i, n)+1))
+            new_nodes.append(tuple(node))
+
+        self.nodes = new_nodes
+        self.calculate_points(force=True)
+
+    def raise_degree_action_triggered(self, state):
+        degree, ok = QInputDialog().getInt(self.model.parent,
+                                               "Raise degree",
+                                               "Raise by:",
+                                               value=0,
+                                               min=0,
+                                               max=100,
+                                               step=1)
+        if ok and degree > 0:
+            logger.info(f"Degree raising: +{degree}")
+            self.raise_degree(degree)
+            self.model.updated()
 
     def __approximate_length(self):
         if len(self.nodes) < 2:

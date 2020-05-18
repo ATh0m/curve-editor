@@ -36,6 +36,7 @@ class Curve(object):
         self.model = model
 
         self.toolbar = None
+        self.extra_toolbar = None
 
     def __repr__(self):
         return f"{self.type} | {len(self.nodes)} nodes"
