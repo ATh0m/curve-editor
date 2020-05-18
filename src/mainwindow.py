@@ -6,7 +6,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 
 from .canvas import Canvas
-from .curves import BezierCurve, PolygonalCurve
+from .curves import BezierCurve, PolygonalCurve, InterpolationPolynomialCurve
 from .model import CurvesModel
 
 from .states import SelectCurveState, RemoveCurveState, MoveCurveState, DuplicateCurveState
@@ -80,6 +80,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         curve.add_node_action.trigger()
 
+    def new_polynomial_action_triggered(self):
+        curve = InterpolationPolynomialCurve("")
+        self.model.add(curve, selected=True)
+
+        curve.add_node_action.trigger()
+
     def select_curve_action_triggered(self, state):
         logger.info("select curve mode")
         self.model.state = SelectCurveState()
@@ -94,6 +100,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # button_action.setStatusTip("This is your button")
         new_polygonal_action.triggered.connect(self.new_polygonal_action_triggered)
         self.toolBar.addAction(new_polygonal_action)
+
+        new_polynomial_action = QtWidgets.QAction("New Polynomial", self)
+        # button_action.setStatusTip("This is your button")
+        new_polynomial_action.triggered.connect(self.new_polynomial_action_triggered)
+        self.toolBar.addAction(new_polynomial_action)
 
         select_action = QtWidgets.QAction("Select curve", self)
         select_action.triggered.connect(self.select_curve_action_triggered)
