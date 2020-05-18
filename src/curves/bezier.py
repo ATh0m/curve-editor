@@ -6,6 +6,7 @@ import math
 import numpy as np
 
 from PyQt5 import QtGui, QtCore, QtWidgets
+from PyQt5.QtWidgets import QInputDialog
 
 from .curves import Curve
 
@@ -13,6 +14,8 @@ from .curves import Curve
 class BezierCurve(Curve):
     def __init__(self, name, nodes=None):
         super().__init__(name, nodes)
+
+        self.helper_nodes = {}
 
         self.type = "Bezier Curve"
 
@@ -60,18 +63,6 @@ class BezierCurve(Curve):
             self.model.updated()
             logger.info(f'Convex hull: {state}')
 
-    def __de_casteljau(self, k, i, t, cache):
-        if (k, i) not in cache:
-            if k == 0:
-                cache[(k, i)] = np.array(self.nodes[i])
-            else:
-                cache[(k, i)] = (1 - t) * self.__de_casteljau(k-1, i, t, cache) + \
-                                t * self.__de_casteljau(k-1, i+1, t, cache)
-        return cache[(k, i)]
-
-    def de_casteljau(self, t):
-        return tuple(self.__de_casteljau(len(self.nodes)-1, 0, t, dict()))
-
     def __approximate_length(self):
         if len(self.nodes) < 2:
             return 0.0
@@ -85,22 +76,35 @@ class BezierCurve(Curve):
 
         return length
 
-    def calculate_points(self):
+    def __de_casteljau(self, k, i, t):
+        if (k, i, t) not in self.helper_nodes:
+            if k == 0:
+                self.helper_nodes[(k, i, t)] = np.array(self.nodes[i])
+            else:
+                u = t / self.resolution
+                self.helper_nodes[(k, i, t)] = (1 - u) * self.__de_casteljau(k-1, i, t) + \
+                                               u * self.__de_casteljau(k-1, i+1, t)
+        return self.helper_nodes[(k, i, t)]
+
+    def de_casteljau(self, t):
+        return tuple(self.__de_casteljau(len(self.nodes)-1, 0, t))
+
+    def calculate_points(self, force=False):
         super().calculate_points()
 
         if not self.nodes:
             self.points = []
             return self.points
 
-        approximate_length = self.__approximate_length()
-        logger.info(approximate_length)
+        if force:
+            self.helper_nodes = {}
 
         steps = self.resolution
 
-        points = [self.nodes[0]]
-        for point in BezierCurve.bezier_curve_range(steps, self.nodes):
-            points.append(point)
-        # points = [self.de_casteljau(i / steps) for i in range(steps + 1)]
+        # points = [self.nodes[0]]
+        # for point in BezierCurve.bezier_curve_range(steps, self.nodes):
+        #     points.append(point)
+        points = [self.de_casteljau(i) for i in range(steps + 1)]
 
         self.points = points
         return self.points

@@ -207,7 +207,7 @@ class ChangeNodesOrderState(DefaultState):
             curve.nodes[self.first_node] = second_node
             curve.nodes[self.second_node] = first_node
 
-            curve.calculate_points()
+            curve.calculate_points(force=True)
 
         elif self.mode == 'before':
             curve.nodes.insert(self.second_node, first_node)
@@ -216,6 +216,8 @@ class ChangeNodesOrderState(DefaultState):
                 curve.nodes.pop(self.first_node + 1)
             else:
                 curve.nodes.pop(self.first_node)
+
+            curve.calculate_points(force=True)
         elif self.mode == 'after':
             curve.nodes.insert(self.second_node + 1, first_node)
 
@@ -223,6 +225,8 @@ class ChangeNodesOrderState(DefaultState):
                 curve.nodes.pop(self.first_node + 1)
             else:
                 curve.nodes.pop(self.first_node)
+
+            curve.calculate_points(force=True)
 
     def disable(self):
         self.controller.setChecked(False)

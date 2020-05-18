@@ -31,7 +31,7 @@ class Curve(object):
         self.color = QtCore.Qt.blue
         self.width = 1.0
 
-        self.resolution = 1000
+        self.resolution = 500
 
         self.model = model
 
@@ -231,10 +231,10 @@ class Curve(object):
         if ok and resolution != self.resolution:
             logger.info(f"Curve resolution: {resolution}")
             self.resolution = resolution
-            self.calculate_points()
+            self.calculate_points(force=True)
             self.model.updated()
 
-    def calculate_points(self):
+    def calculate_points(self, force=False):
         if len(self.nodes) >= 3:
             hull = ConvexHull(self.nodes)
             self.convex_hull = [self.nodes[i] for i in hull.vertices]
