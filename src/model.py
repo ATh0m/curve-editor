@@ -43,7 +43,7 @@ class CurvesModel(QAbstractListModel):
         return len(self.curves)
 
     def distance_to_nearest_curve(self, x, y):
-        dists = [(curve.distance_to_nearest_point(x, y), i)
+        dists = [(curve.distance_to_nearest_point(x, y)[1], i)
                  for i, curve in enumerate(self.curves)]
 
         if dists:

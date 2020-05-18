@@ -256,3 +256,43 @@ class DuplicateCurveState(DefaultState):
             canvas.model.updated()
 
         canvas.model.state = self.next_state()
+
+
+class SplitCurveState(DefaultState):
+    def __init__(self, curve):
+        super().__init__()
+        self.curve = curve
+
+    def mousePressEvent(self, event, canvas):
+        x, y = event.pos().x(), event.pos().y()
+
+        curve = self.curve
+        index, dist = curve.distance_to_nearest_point(x, y)
+
+        if dist is not None and dist < 10:
+            n = len(curve.nodes) - 1
+
+            first_nodes = [tuple(curve._de_casteljau(k, 0, index))
+                           for k in range(n+1)]
+
+            second_nodes = [tuple(curve._de_casteljau(k, n-k, index))
+                            for k in range(n+1)]
+
+            first_curve = curve.clone()
+            second_curve = curve.clone()
+
+            first_curve.nodes = first_nodes
+            first_curve.calculate_points(force=True)
+
+            second_curve.nodes = second_nodes
+            second_curve.calculate_points(force=True)
+
+            canvas.model.add(first_curve)
+            canvas.model.add(second_curve)
+
+            for i in range(len(canvas.model.curves)):
+                if canvas.model.curves[i] is curve:
+                    canvas.model.remove_curve(i)
+                    break
+
+        canvas.model.state = self.next_state()

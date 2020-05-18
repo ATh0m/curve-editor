@@ -242,12 +242,14 @@ class Curve(object):
             self.convex_hull = []
 
     def distance_to_nearest_point(self, x, y):
-        dists = [np.sqrt((x - px) ** 2 + (y - py) ** 2) for px, py in self.points]
+        dists = [(np.sqrt((x - px) ** 2 + (y - py) ** 2), i)
+                 for i, (px, py) in enumerate(self.points)]
 
         if dists:
-            return min(dists)
+            dist, index = min(dists)
+            return index, dist
 
-        return np.inf
+        return None, None
 
     def nearest_node(self, x, y):
         dists = [(np.sqrt((x - px) ** 2 + (y - py) ** 2), i) for i, (px, py) in enumerate(self.nodes)]

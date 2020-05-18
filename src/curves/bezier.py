@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import QInputDialog
 
 from .curves import Curve
 
+from src.states import SplitCurveState, DefaultState
 
 class BezierCurve(Curve):
     def __init__(self, name, nodes=None):
@@ -57,11 +58,22 @@ class BezierCurve(Curve):
         self.show_convex_hull_action.setCheckable(True)
         self.toolbar.addAction(self.show_convex_hull_action)
 
+        self.split_curve_action = QtWidgets.QAction("Split curve", parent)
+        self.split_curve_action.triggered.connect(self.split_curve_action_triggered)
+        self.split_curve_action.setCheckable(True)
+        self.toolbar.addAction(self.split_curve_action)
+
     def show_convex_hull_action_triggered(self, state):
         if self.show_convex_hull != state:
             self.show_convex_hull = state
             self.model.updated()
             logger.info(f'Convex hull: {state}')
+
+    def split_curve_action_triggered(self, state):
+        if state:
+            self.model.state = SplitCurveState(self)
+        else:
+            self.model.state = DefaultState()
 
     def __approximate_length(self):
         if len(self.nodes) < 2:
@@ -76,18 +88,18 @@ class BezierCurve(Curve):
 
         return length
 
-    def __de_casteljau(self, k, i, t):
+    def _de_casteljau(self, k, i, t):
         if (k, i, t) not in self.helper_nodes:
             if k == 0:
                 self.helper_nodes[(k, i, t)] = np.array(self.nodes[i])
             else:
                 u = t / self.resolution
-                self.helper_nodes[(k, i, t)] = (1 - u) * self.__de_casteljau(k-1, i, t) + \
-                                               u * self.__de_casteljau(k-1, i+1, t)
+                self.helper_nodes[(k, i, t)] = (1 - u) * self._de_casteljau(k-1, i, t) + \
+                                               u * self._de_casteljau(k-1, i+1, t)
         return self.helper_nodes[(k, i, t)]
 
     def de_casteljau(self, t):
-        return tuple(self.__de_casteljau(len(self.nodes)-1, 0, t))
+        return tuple(self._de_casteljau(len(self.nodes)-1, 0, t))
 
     def calculate_points(self, force=False):
         super().calculate_points()
@@ -101,9 +113,12 @@ class BezierCurve(Curve):
 
         steps = self.resolution
 
+        # Basic Algorithm
         points = [self.nodes[0]]
         for point in BezierCurve.bezier_curve_range(steps, self.nodes):
             points.append(point)
+
+        # De Casteljau Algorithm
         # points = [self.de_casteljau(i) for i in range(steps + 1)]
 
         self.points = points
