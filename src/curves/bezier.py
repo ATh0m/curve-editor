@@ -73,6 +73,7 @@ class BezierCurve(Curve):
     def show_convex_hull_action_triggered(self, state):
         if self.show_convex_hull != state:
             self.show_convex_hull = state
+            self.calculate_points()
             self.model.updated()
             logger.info(f'Convex hull: {state}')
 
@@ -135,11 +136,21 @@ class BezierCurve(Curve):
     def de_casteljau(self, t):
         return tuple(self._de_casteljau(len(self.nodes)-1, 0, t))
 
-    def calculate_points(self, force=False):
+    def calculate_points(self, force=False, fast=False):
         super().calculate_points()
 
         if not self.nodes:
             self.points = []
+            return self.points
+
+        if fast:
+            steps = max(20, self.resolution // 10)
+
+            points = [self.nodes[0]]
+            for point in BezierCurve.bezier_curve_range(steps, self.nodes):
+                points.append(point)
+
+            self.points = points
             return self.points
 
         if force:
@@ -148,12 +159,12 @@ class BezierCurve(Curve):
         steps = self.resolution
 
         # Basic Algorithm
-        points = [self.nodes[0]]
-        for point in BezierCurve.bezier_curve_range(steps, self.nodes):
-            points.append(point)
+        # points = [self.nodes[0]]
+        # for point in BezierCurve.bezier_curve_range(steps, self.nodes):
+        #     points.append(point)
 
         # De Casteljau Algorithm
-        # points = [self.de_casteljau(i) for i in range(steps + 1)]
+        points = [self.de_casteljau(i) for i in range(steps + 1)]
 
         self.points = points
         return self.points

@@ -235,12 +235,16 @@ class Curve(object):
             self.calculate_points(force=True)
             self.model.updated()
 
-    def calculate_points(self, force=False):
+    def calculate_convex_hull(self):
         if len(self.nodes) >= 3:
             hull = ConvexHull(self.nodes)
             self.convex_hull = [self.nodes[i] for i in hull.vertices]
         else:
             self.convex_hull = []
+
+    def calculate_points(self, force=False, fast=False):
+        if self.show_convex_hull:
+            self.calculate_convex_hull()
 
     def distance_to_nearest_point(self, x, y):
         dists = [(np.sqrt((x - px) ** 2 + (y - py) ** 2), i)
@@ -326,9 +330,10 @@ class Curve(object):
         center = (center[0] / n, center[1] / n)
         return center
 
-    def translate(self, dx, dy):
+    def translate(self, dx, dy, calculate=True):
         self.nodes = [(x + dx, y + dy) for x, y in self.nodes]
-        self.calculate_points()
+        if calculate:
+            self.calculate_points(force=True)
 
     def scale(self, scalar):
         (cx, cy) = self.calculate_center()
