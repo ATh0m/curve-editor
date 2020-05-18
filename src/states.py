@@ -141,6 +141,8 @@ class MoveNodeState(DefaultState):
         self.curve = curve
         self.selected_point = None
 
+        self.nodes_limit = 25
+
     def disable(self):
         self.curve.move_node_action.setChecked(False)
 
@@ -163,14 +165,14 @@ class MoveNodeState(DefaultState):
 
             curve.nodes[index] = (x, y)
 
-            if len(curve.nodes) <= 10:
+            if len(curve.nodes) <= self.nodes_limit:
                 curve.calculate_points(force=True)
             canvas.model.updated()
 
     def mouseReleaseEvent(self, event, canvas):
         if self.selected_point is not None:
             curve = self.curve
-            if len(curve.nodes) > 10:
+            if len(curve.nodes) > self.nodes_limit:
                 curve.calculate_points(force=True)
                 canvas.model.updated()
 
