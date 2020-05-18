@@ -66,6 +66,10 @@ class CurvesModel(QAbstractListModel):
         if self.selected_curve:
             self.selected_curve.selected = False
 
+        if len(self.selected_curve.nodes) < 2:
+            self.remove_selected()
+            return
+
         self.selected_curve = None
         self.selected_curve_index = None
 
