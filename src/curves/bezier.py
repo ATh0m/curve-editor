@@ -13,6 +13,7 @@ from .curves import Curve
 
 from src.states import SplitCurveState, DefaultState
 
+
 class BezierCurve(Curve):
     def __init__(self, name, nodes=None):
         super().__init__(name, nodes)
@@ -90,8 +91,8 @@ class BezierCurve(Curve):
         new_nodes = []
 
         for i in range(n + m + 1):
-            node = sum(nodes[k] * comb(n, k) * comb(m, i-k) * comb(n+m, i)**(-1)
-                       for k in range(max(0, i-m), min(i, n)+1))
+            node = sum(nodes[k] * comb(n, k) * comb(m, i - k) * comb(n + m, i) ** (-1)
+                       for k in range(max(0, i - m), min(i, n) + 1))
             new_nodes.append(tuple(node))
 
         self.nodes = new_nodes
@@ -99,12 +100,12 @@ class BezierCurve(Curve):
 
     def raise_degree_action_triggered(self, state):
         degree, ok = QInputDialog().getInt(self.model.parent,
-                                               "Raise degree",
-                                               "Raise by:",
-                                               value=0,
-                                               min=0,
-                                               max=100,
-                                               step=1)
+                                           "Raise degree",
+                                           "Raise by:",
+                                           value=0,
+                                           min=0,
+                                           max=100,
+                                           step=1)
         if ok and degree > 0:
             logger.info(f"Degree raising: +{degree}")
             self.raise_degree(degree)
@@ -119,7 +120,7 @@ class BezierCurve(Curve):
             x, y = self.nodes[i]
             next_x, next_y = self.nodes[i + 1]
 
-            length += np.sqrt((next_x - x)**2 + (next_y - y)**2)
+            length += np.sqrt((next_x - x) ** 2 + (next_y - y) ** 2)
 
         return length
 
@@ -129,12 +130,12 @@ class BezierCurve(Curve):
                 self.helper_nodes[(k, i, t)] = np.array(self.nodes[i])
             else:
                 u = t / self.resolution
-                self.helper_nodes[(k, i, t)] = (1 - u) * self._de_casteljau(k-1, i, t) + \
-                                               u * self._de_casteljau(k-1, i+1, t)
+                self.helper_nodes[(k, i, t)] = (1 - u) * self._de_casteljau(k - 1, i, t) + \
+                                               u * self._de_casteljau(k - 1, i + 1, t)
         return self.helper_nodes[(k, i, t)]
 
     def de_casteljau(self, t):
-        return tuple(self._de_casteljau(len(self.nodes)-1, 0, t))
+        return tuple(self._de_casteljau(len(self.nodes) - 1, 0, t))
 
     def calculate_points(self, force=False, fast=False):
         super().calculate_points()

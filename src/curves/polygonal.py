@@ -1,5 +1,3 @@
-from PyQt5 import QtGui, QtCore
-
 from .curves import Curve
 
 
@@ -9,6 +7,6 @@ class PolygonalCurve(Curve):
 
         self.type = "Polygonal Curve"
 
-    def calculate_points(self):
+    def calculate_points(self, force=True, fast=False):
         self.points = self.nodes
         return self.points

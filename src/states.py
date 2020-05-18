@@ -276,10 +276,10 @@ class SplitCurveState(DefaultState):
             n = len(curve.nodes) - 1
 
             first_nodes = [tuple(curve._de_casteljau(k, 0, index))
-                           for k in range(n+1)]
+                           for k in range(n + 1)]
 
-            second_nodes = [tuple(curve._de_casteljau(k, n-k, index))
-                            for k in range(n+1)]
+            second_nodes = [tuple(curve._de_casteljau(k, n - k, index))
+                            for k in range(n + 1)]
 
             first_curve = curve.clone()
             second_curve = curve.clone()
