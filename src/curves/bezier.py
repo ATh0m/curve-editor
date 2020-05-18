@@ -101,10 +101,10 @@ class BezierCurve(Curve):
 
         steps = self.resolution
 
-        # points = [self.nodes[0]]
-        # for point in BezierCurve.bezier_curve_range(steps, self.nodes):
-        #     points.append(point)
-        points = [self.de_casteljau(i) for i in range(steps + 1)]
+        points = [self.nodes[0]]
+        for point in BezierCurve.bezier_curve_range(steps, self.nodes):
+            points.append(point)
+        # points = [self.de_casteljau(i) for i in range(steps + 1)]
 
         self.points = points
         return self.points
