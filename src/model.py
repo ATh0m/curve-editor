@@ -25,6 +25,7 @@ class CurvesModel(QAbstractListModel):
     def state(self, s):
         self.__state.disable()
         self.__state = s
+        self.__state.enable()
 
     def add(self, curve: Curve, selected=False):
         curve.setup_toolbar(self.parent)

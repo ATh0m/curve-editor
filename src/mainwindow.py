@@ -73,18 +73,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.model.add(curve, selected=True)
 
         curve.add_node_action.trigger()
+        curve.show_nodes_action.trigger()
 
     def new_polygonal_action_triggered(self):
         curve = PolygonalCurve("")
         self.model.add(curve, selected=True)
 
         curve.add_node_action.trigger()
+        curve.show_nodes_action.trigger()
 
     def new_polynomial_action_triggered(self):
         curve = InterpolationPolynomialCurve("")
         self.model.add(curve, selected=True)
 
         curve.add_node_action.trigger()
+        curve.show_nodes_action.trigger()
 
     def select_curve_action_triggered(self, state):
         logger.info("select curve mode")

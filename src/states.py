@@ -23,6 +23,9 @@ class DefaultState(State):
     def disable(self):
         pass
 
+    def enable(self):
+        pass
+
 
 class SelectCurveState(DefaultState):
     def mousePressEvent(self, event, canvas):
@@ -118,6 +121,10 @@ class RemoveNodeState(DefaultState):
 
         self.curve = curve
 
+    def enable(self):
+        if not self.curve.show_nodes_action.isChecked():
+            self.curve.show_nodes_action.trigger()
+
     def disable(self):
         self.curve.remove_node_action.setChecked(False)
 
@@ -144,7 +151,9 @@ class MoveNodeState(DefaultState):
         self.curve = curve
         self.selected_point = None
 
-        # self.nodes_limit = 25
+    def enable(self):
+        if not self.curve.show_nodes_action.isChecked():
+            self.curve.show_nodes_action.trigger()
 
     def disable(self):
         self.curve.move_node_action.setChecked(False)
@@ -190,6 +199,10 @@ class ChangeNodesOrderState(DefaultState):
         self.curve = curve
         self.first_node = None
         self.second_node = None
+
+    def enable(self):
+        if not self.curve.show_nodes_action.isChecked():
+            self.curve.show_nodes_action.trigger()
 
     def mousePressEvent(self, event, canvas):
         x, y = event.pos().x(), event.pos().y()
