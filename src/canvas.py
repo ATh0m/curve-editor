@@ -29,7 +29,9 @@ class Canvas(QtWidgets.QGraphicsPixmapItem):
         self.model.state.mouseReleaseEvent(event, self)
 
     def draw(self):
-        pixmap = QtGui.QPixmap(930, 690)
+        # pixmap = QtGui.QPixmap(930, 690)
+        pixmap = QtGui.QPixmap(2000, 1000)
+
         pixmap.fill(Qt.white)
 
         qp = QtGui.QPainter(pixmap)

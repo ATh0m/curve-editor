@@ -56,13 +56,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if self.selected_curve is not None:
                 if self.selected_curve.toolbar is not None:
                     self.addToolBarBreak()
-                    self.addToolBar(Qt.TopToolBarArea,
+                    self.addToolBar(Qt.LeftToolBarArea,
                                     self.selected_curve.toolbar)
                     self.selected_curve.toolbar.show()
 
                     if self.selected_curve.extra_toolbar is not None:
                         self.addToolBarBreak()
-                        self.addToolBar(Qt.TopToolBarArea,
+                        self.addToolBar(Qt.LeftToolBarArea,
                                         self.selected_curve.extra_toolbar)
                         self.selected_curve.extra_toolbar.show()
 
