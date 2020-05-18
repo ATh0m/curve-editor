@@ -73,7 +73,7 @@ class BezierCurve(Curve):
     def show_convex_hull_action_triggered(self, state):
         if self.show_convex_hull != state:
             self.show_convex_hull = state
-            self.calculate_points()
+            self.calculate_points(force=False)
             self.model.updated()
             logger.info(f'Convex hull: {state}')
 
@@ -95,7 +95,7 @@ class BezierCurve(Curve):
             new_nodes.append(tuple(node))
 
         self.nodes = new_nodes
-        self.calculate_points(force=True)
+        self.calculate_points()
 
     def raise_degree_action_triggered(self, state):
         degree, ok = QInputDialog().getInt(self.model.parent,

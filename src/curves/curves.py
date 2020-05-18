@@ -232,7 +232,7 @@ class Curve(object):
         if ok and resolution != self.resolution:
             logger.info(f"Curve resolution: {resolution}")
             self.resolution = resolution
-            self.calculate_points(force=True)
+            self.calculate_points()
             self.model.updated()
 
     def calculate_convex_hull(self):
@@ -242,7 +242,7 @@ class Curve(object):
         else:
             self.convex_hull = []
 
-    def calculate_points(self, force=False, fast=False):
+    def calculate_points(self, force=True, fast=False):
         if self.show_convex_hull:
             self.calculate_convex_hull()
 
@@ -333,7 +333,7 @@ class Curve(object):
     def translate(self, dx, dy, calculate=True):
         self.nodes = [(x + dx, y + dy) for x, y in self.nodes]
         if calculate:
-            self.calculate_points(force=True)
+            self.calculate_points()
 
     def scale(self, scalar):
         (cx, cy) = self.calculate_center()
