@@ -41,6 +41,10 @@ class Curve(object):
     def __repr__(self):
         return f"{self.type} | {len(self.nodes)} nodes"
 
+    def add_node(self, x, y):
+        self.nodes.append((x, y))
+        self.calculate_points()
+
     def clone(self):
         return copy.copy(self)
 

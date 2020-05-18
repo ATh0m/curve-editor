@@ -108,10 +108,7 @@ class AddNodeState(DefaultState):
     def mousePressEvent(self, event, canvas):
         x, y = event.pos().x(), event.pos().y()
 
-        curve = self.curve
-        curve.nodes.append((x, y))
-        curve.calculate_points()
-
+        self.curve.add_node(x, y)
         canvas.model.layoutChanged.emit()
 
 

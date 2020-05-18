@@ -22,6 +22,10 @@ class BezierCurve(Curve):
 
         self.type = "Bezier Curve"
 
+    def add_node(self, x, y):
+        self.nodes.append((x, y))
+        self.calculate_points(force=False)
+
     @staticmethod
     def binomial(i, n):
         """Binomial coefficient"""

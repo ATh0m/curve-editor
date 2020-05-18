@@ -6,7 +6,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 
 from .canvas import Canvas
-from .curves import BezierCurve, PolygonalCurve, InterpolationPolynomialCurve
+from .curves import BezierCurve, PolygonalCurve, InterpolationPolynomialCurve, RationalBezierCurve
 from .model import CurvesModel
 
 from .states import SelectCurveState, RemoveCurveState, MoveCurveState, DuplicateCurveState
@@ -75,6 +75,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         curve.add_node_action.trigger()
         curve.show_nodes_action.trigger()
 
+    def new_rational_bezier_action_triggered(self):
+        curve = RationalBezierCurve("")
+        self.model.add(curve, selected=True)
+
+        curve.add_node_action.trigger()
+        curve.show_nodes_action.trigger()
+
     def new_polygonal_action_triggered(self):
         curve = PolygonalCurve("")
         self.model.add(curve, selected=True)
@@ -98,6 +105,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # button_action.setStatusTip("This is your button")
         new_bezier_action.triggered.connect(self.new_bezier_action_triggered)
         self.toolBar.addAction(new_bezier_action)
+
+        new_rational_bezier_action = QtWidgets.QAction("New Rational Bezier", self)
+        # button_action.setStatusTip("This is your button")
+        new_rational_bezier_action.triggered.connect(self.new_rational_bezier_action_triggered)
+        self.toolBar.addAction(new_rational_bezier_action)
 
         new_polygonal_action = QtWidgets.QAction("New Polygonal", self)
         # button_action.setStatusTip("This is your button")
