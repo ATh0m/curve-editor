@@ -31,6 +31,8 @@ class Curve(object):
         self.color = QtCore.Qt.blue
         self.width = 1.0
 
+        self.resolution = 1000
+
         self.model = model
 
         self.toolbar = None
@@ -118,6 +120,11 @@ class Curve(object):
         self.line_width_action.triggered.connect(
             self.line_width_action_triggered)
         self.toolbar.addAction(self.line_width_action)
+
+        self.resolution_set_action = QtWidgets.QAction("Set resolution", parent)
+        self.resolution_set_action.triggered.connect(
+            self.resolution_set_action_triggered)
+        self.toolbar.addAction(self.resolution_set_action)
 
     def add_node_action_triggered(self, state):
         if state:
@@ -211,6 +218,20 @@ class Curve(object):
         if ok and width != self.width:
             logger.info(f"Curve width: {width}")
             self.width = width
+            self.model.updated()
+
+    def resolution_set_action_triggered(self):
+        resolution, ok = QInputDialog().getInt(self.model.parent,
+                                               "Curve resolution",
+                                               "Points number:",
+                                               value=self.resolution,
+                                               min=100,
+                                               max=100000,
+                                               step=100)
+        if ok and resolution != self.resolution:
+            logger.info(f"Curve resolution: {resolution}")
+            self.resolution = resolution
+            self.calculate_points()
             self.model.updated()
 
     def calculate_points(self):

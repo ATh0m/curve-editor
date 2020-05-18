@@ -95,7 +95,7 @@ class BezierCurve(Curve):
         approximate_length = self.__approximate_length()
         logger.info(approximate_length)
 
-        steps = int(max(approximate_length // 10, 10)) # 1000
+        steps = self.resolution
 
         points = [self.nodes[0]]
         for point in BezierCurve.bezier_curve_range(steps, self.nodes):
