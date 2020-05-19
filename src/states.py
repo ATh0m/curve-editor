@@ -1,3 +1,5 @@
+from PyQt5.QtWidgets import QInputDialog
+
 import logging
 
 logger = logging.getLogger('curve-editor')
@@ -276,5 +278,37 @@ class SplitCurveState(DefaultState):
                 if canvas.model.curves[i] is curve:
                     canvas.model.remove_curve(i)
                     break
+
+        canvas.model.state = self.next_state()
+
+
+class SetWeightNodeState(DefaultState):
+    def __init__(self, curve):
+        super().__init__()
+        self.curve = curve
+
+    def enable(self):
+        if not self.curve.show_nodes_action.isChecked():
+            self.curve.show_nodes_action.trigger()
+
+    def disable(self):
+        self.curve.set_weight_action.setChecked(False)
+
+    def mousePressEvent(self, event, canvas):
+        x, y = event.pos().x(), event.pos().y()
+        curve = self.curve
+        index, dist = curve.nearest_node(x, y)
+
+        if dist is not None and dist < 10:
+            logger.info('Changing node weight')
+            weight, ok = QInputDialog().getDouble(canvas.model.parent,
+                                                  "Set node weight",
+                                                  "Weight:",
+                                                  value=curve.weights[index],
+                                                  min=0.0)
+            if ok:
+                logger.info(f"Setting node weight: {weight}")
+                curve.set_node_weight(index, weight)
+                canvas.model.updated()
 
         canvas.model.state = self.next_state()
