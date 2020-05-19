@@ -89,6 +89,26 @@ class BezierCurve(Curve):
         else:
             self.model.state = DefaultState()
 
+    def split_curve(self, index):
+        n = len(self.nodes) - 1
+
+        first_nodes = [tuple(self._de_casteljau(k, 0, index))
+                       for k in range(n + 1)]
+
+        second_nodes = [tuple(self._de_casteljau(k, n - k, index))
+                        for k in range(n + 1)]
+
+        first_curve = self.clone()
+        second_curve = self.clone()
+
+        first_curve.nodes = first_nodes
+        first_curve.calculate_points(force=True)
+
+        second_curve.nodes = second_nodes
+        second_curve.calculate_points(force=True)
+
+        return first_curve, second_curve
+
     def raise_degree(self, m):
         nodes = [np.array(node) for node in self.nodes]
         n = len(nodes) - 1

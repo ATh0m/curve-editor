@@ -16,12 +16,12 @@ logger = logging.getLogger('curve-editor')
 
 
 class RationalBezierCurve(BezierCurve):
-    def __init__(self, name, nodes=None):
+    def __init__(self, name, nodes=None, weights=None):
         super().__init__(name, nodes)
 
         self.helper_weights = {}
 
-        self.weights = []
+        self.weights = weights or []
         self.type = "Rational Bezier Curve"
 
     def add_node(self, x, y, calculate=True):
@@ -105,7 +105,6 @@ class RationalBezierCurve(BezierCurve):
         self.set_weight_action.setCheckable(True)
         self.extra_toolbar.addAction(self.set_weight_action)
 
-        self.split_curve_action.setDisabled(True)
         self.raise_degree_action.setDisabled(True)
 
     def set_weight_action_triggered(self, state):
@@ -113,6 +112,34 @@ class RationalBezierCurve(BezierCurve):
             self.model.state = SetWeightNodeState(self)
         else:
             self.model.state = DefaultState()
+
+    def split_curve(self, index):
+        n = len(self.nodes) - 1
+
+        first_nodes, first_weights = [], []
+        second_nodes, second_weights = [], []
+        for k in range(n+1):
+            w1, W1 = self._rational_de_casteljau(k, 0, index)
+            w2, W2 = self._rational_de_casteljau(k, n - k, index)
+            
+            first_nodes.append(tuple(W1))
+            first_weights.append(w1)
+            
+            second_nodes.append(tuple(W2))
+            second_weights.append(w2)
+
+        first_curve = self.clone()
+        second_curve = self.clone()
+
+        first_curve.nodes = first_nodes
+        first_curve.weights = first_weights
+        first_curve.calculate_points(force=True)
+
+        second_curve.nodes = second_nodes
+        second_curve.weights = second_weights
+        second_curve.calculate_points(force=True)
+
+        return first_curve, second_curve
 
     def draw_nodes(self, qp: QtGui.QPainter):
         black_pen = QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.DashLine)
@@ -137,14 +164,14 @@ class RationalBezierCurve(BezierCurve):
             qp.drawText(point[0] + 5, point[1] - 3, f'{i+1} ({weights[i]: .2f})')
             old_point = point
 
-    def _de_casteljau(self, i, k, t):
+    def _rational_de_casteljau(self, i, k, t):
         if (i, k, t) not in self.helper_nodes:
             if i == 0:
                 self.helper_weights[(i, k, t)] = self.weights[k]
                 self.helper_nodes[(i, k, t)] = np.array(self.nodes[k])
             else:
-                w1, W1 = self._de_casteljau(i-1, k, t)
-                w2, W2 = self._de_casteljau(i-1, k+1, t)
+                w1, W1 = self._rational_de_casteljau(i-1, k, t)
+                w2, W2 = self._rational_de_casteljau(i-1, k+1, t)
 
                 u = t / self.resolution
                 w = (1 - u) * w1 + u * w2
@@ -155,12 +182,12 @@ class RationalBezierCurve(BezierCurve):
 
         return self.helper_weights[(i, k, t)], self.helper_nodes[(i, k, t)]
 
-    def de_casteljau(self, t):
-        _, W = self._de_casteljau(len(self.nodes) - 1, 0, t)
-        return tuple(W)
+    def rational_de_casteljau(self, t):
+        w, W = self._rational_de_casteljau(len(self.nodes) - 1, 0, t)
+        return w, tuple(W)
 
     def calculate_points(self, force=True, fast=False):
-        super().calculate_points()
+        super(BezierCurve, self).calculate_points()
 
         if not self.nodes:
             self.points = []
@@ -185,7 +212,7 @@ class RationalBezierCurve(BezierCurve):
         steps = self.resolution
 
         # Rational De Casteljau Algorithm
-        points = [self.de_casteljau(i) for i in range(steps + 1)]
+        points = [self.rational_de_casteljau(i)[1] for i in range(steps + 1)]
 
         self.points = points
         return self.points
