@@ -197,14 +197,15 @@ class BezierCurve(Curve):
 
     def draw_nodes(self, qp: QtGui.QPainter):
         black_pen = QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.DashLine)
-        red_pen = QtGui.QPen(QtCore.Qt.red, 1, QtCore.Qt.DashLine)
-        red_brush = QtGui.QBrush(QtCore.Qt.red)
+        red_pen = QtGui.QPen(self.node_color, 1, QtCore.Qt.DashLine)
+        red_brush = QtGui.QBrush(self.node_color)
 
+        node_size = self.node_size
         old_point = self.nodes[0]
 
         qp.setPen(red_pen)
         qp.setBrush(red_brush)
-        qp.drawEllipse(old_point[0] - 3, old_point[1] - 3, 6, 6)
+        qp.drawEllipse(QtCore.QPointF(old_point[0] - 3, old_point[1] - 3), node_size, node_size)
 
         qp.drawText(old_point[0] + 5, old_point[1] - 3, '1')
         for i, point in enumerate(self.nodes[1:]):
@@ -213,7 +214,7 @@ class BezierCurve(Curve):
             qp.drawLine(old_point[0], old_point[1], point[0], point[1])
 
             qp.setPen(red_pen)
-            qp.drawEllipse(point[0] - 3, point[1] - 3, 6, 6)
+            qp.drawEllipse(QtCore.QPointF(point[0] - 3, point[1] - 3), node_size, node_size)
 
             qp.drawText(point[0] + 5, point[1] - 3, '%d' % i)
             old_point = point

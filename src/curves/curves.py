@@ -31,6 +31,9 @@ class Curve(object):
         self.color = QtCore.Qt.blue
         self.width = 1.0
 
+        self.node_color = QtCore.Qt.red
+        self.node_size = 3.0
+
         self.resolution = 500
 
         self.model = model
@@ -154,20 +157,38 @@ class Curve(object):
             self.scale_action_triggered)
         self.toolbar.addAction(self.scale_action)
 
+        curve_properties_button = QtWidgets.QToolButton(parent)
+        curve_properties_button.setText("Curve Properties ▶")
+        curve_properties_button.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+        curve_properties_menu = QtWidgets.QMenu(curve_properties_button)
+
         self.line_color_action = QtWidgets.QAction("Line color", parent)
         self.line_color_action.triggered.connect(
             self.line_color_action_triggered)
-        self.toolbar.addAction(self.line_color_action)
+        curve_properties_menu.addAction(self.line_color_action)
 
         self.line_width_action = QtWidgets.QAction("Line width", parent)
         self.line_width_action.triggered.connect(
             self.line_width_action_triggered)
-        self.toolbar.addAction(self.line_width_action)
+        curve_properties_menu.addAction(self.line_width_action)
 
         self.resolution_set_action = QtWidgets.QAction("Set resolution", parent)
         self.resolution_set_action.triggered.connect(
             self.resolution_set_action_triggered)
-        self.toolbar.addAction(self.resolution_set_action)
+        curve_properties_menu.addAction(self.resolution_set_action)
+
+        self.node_color_action = QtWidgets.QAction("Nodes color", parent)
+        self.node_color_action.triggered.connect(
+            self.node_color_action_triggered)
+        curve_properties_menu.addAction(self.node_color_action)
+
+        self.node_size_action = QtWidgets.QAction("Nodes size", parent)
+        self.node_size_action.triggered.connect(
+            self.node_size_action_triggered)
+        curve_properties_menu.addAction(self.node_size_action)
+
+        curve_properties_button.setMenu(curve_properties_menu)
+        self.toolbar.addWidget(curve_properties_button)
 
     def add_node_action_triggered(self, state):
         if state:
@@ -250,6 +271,16 @@ class Curve(object):
             self.color = color
             self.model.updated()
 
+    def node_color_action_triggered(self):
+        color = QColorDialog().getColor(self.node_color,
+                                        parent=self.model.parent,
+                                        title="Select color")
+
+        if color != self.node_color:
+            logger.info(f"Changed color: {color}")
+            self.node_color = color
+            self.model.updated()
+
     def line_width_action_triggered(self):
         width, ok = QInputDialog().getDouble(self.model.parent,
                                              "Curve width",
@@ -261,6 +292,19 @@ class Curve(object):
         if ok and width != self.width:
             logger.info(f"Curve width: {width}")
             self.width = width
+            self.model.updated()
+
+    def node_size_action_triggered(self):
+        size, ok = QInputDialog().getDouble(self.model.parent,
+                                            "Nodes size",
+                                            "Size:",
+                                            value=self.node_size,
+                                            min=0.1,
+                                            max=100.0,
+                                            decimals=1)
+        if ok and size != self.node_size:
+            logger.info(f"Nodes size: {size}")
+            self.node_size = size
             self.model.updated()
 
     def resolution_set_action_triggered(self):
@@ -334,18 +378,19 @@ class Curve(object):
             qp.drawLine(x, y, next_x, next_y)
 
     def draw_nodes(self, qp: QtGui.QPainter):
-        red_pen = QtGui.QPen(QtCore.Qt.red, 1, QtCore.Qt.DashLine)
-        red_brush = QtGui.QBrush(QtCore.Qt.red)
+        red_pen = QtGui.QPen(self.node_color, 1, QtCore.Qt.DashLine)
+        red_brush = QtGui.QBrush(self.node_color)
 
         qp.setPen(red_pen)
         qp.setBrush(red_brush)
 
+        node_size = self.node_size
         old_point = self.nodes[0]
-        qp.drawEllipse(old_point[0] - 3, old_point[1] - 3, 6, 6)
+        qp.drawEllipse(QtCore.QPointF(old_point[0] - 3, old_point[1] - 3), node_size, node_size)
         qp.drawText(old_point[0] + 5, old_point[1] - 3, '1')
         for i, point in enumerate(self.nodes[1:]):
             i += 2
-            qp.drawEllipse(point[0] - 3, point[1] - 3, 6, 6)
+            qp.drawEllipse(QtCore.QPointF(point[0] - 3, point[1] - 3), node_size, node_size)
             qp.drawText(point[0] + 5, point[1] - 3, '%d' % i)
 
     def draw(self, qp: QtGui.QPainter):
