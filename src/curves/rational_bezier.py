@@ -144,7 +144,7 @@ class RationalBezierCurve(BezierCurve):
     def draw_nodes(self, qp: QtGui.QPainter):
         black_pen = QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.DashLine)
         red_pen = QtGui.QPen(self.node_color, 1, QtCore.Qt.DashLine)
-        red_brush = QtGui.QBrush(QtCore.Qt.red)
+        red_brush = QtGui.QBrush(self.node_color)
 
         node_size = self.node_size
         weights = self.weights

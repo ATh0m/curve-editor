@@ -76,6 +76,10 @@ class BezierCurve(Curve):
         self.raise_degree_action.triggered.connect(self.raise_degree_action_triggered)
         self.extra_toolbar.addAction(self.raise_degree_action)
 
+        self.drop_degree_action = QtWidgets.QAction("Drop degree", parent)
+        self.drop_degree_action.triggered.connect(self.drop_degree_action_triggered)
+        self.extra_toolbar.addAction(self.drop_degree_action)
+
     def show_convex_hull_action_triggered(self, state):
         if self.show_convex_hull != state:
             self.show_convex_hull = state
@@ -108,6 +112,42 @@ class BezierCurve(Curve):
         second_curve.calculate_points(force=True)
 
         return first_curve, second_curve
+
+    def join_right(self, other):
+        pass
+
+    def drop_degree_first_method(self, m=1):
+        n = len(self.nodes) - 1
+        nodes = np.array(self.nodes)
+
+        ws1 = [nodes[0]]
+        for k in range(1, n//2 + 1):
+            w1 = (1 + k / (n-k)) * nodes[k] - k / (n-k) * ws1[k-1]
+            ws1.append(w1)
+
+        ws2 = [nodes[-1]]
+        for k in range(n, n//2, -1):
+            w2 = n / k * nodes[k] + (1 - n / k) * ws2[-1]
+            ws2.append(w2)
+
+        new_nodes = ws1[:-1] + [(ws1[-1] + ws2[-1]) / 2] + ws2[1:-1][::-1]
+        new_nodes = list(map(tuple, new_nodes))
+
+        self.nodes = new_nodes
+        self.calculate_points()
+
+    def drop_degree_action_triggered(self, state):
+        degree, ok = QInputDialog().getInt(self.model.parent,
+                                           "Drop degree",
+                                           "Drop by:",
+                                           value=0,
+                                           min=0,
+                                           max=100,
+                                           step=1)
+        if ok and degree > 0:
+            logger.info(f"Degree dropping: +{degree}")
+            self.drop_degree_first_method(degree)
+            self.model.updated()
 
     def raise_degree(self, m):
         nodes = [np.array(node) for node in self.nodes]
