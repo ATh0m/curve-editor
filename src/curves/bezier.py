@@ -61,35 +61,6 @@ class BezierCurve(Curve):
         if calculate:
             self.calculate_points(force=False)
 
-    @staticmethod
-    def binomial(i, n):
-        """Binomial coefficient"""
-        return math.factorial(n) / float(
-            math.factorial(i) * math.factorial(n - i))
-
-    @staticmethod
-    def bernstein(t, i, n):
-        """Bernstein polynom"""
-        return BezierCurve.binomial(i, n) * (t ** i) * ((1 - t) ** (n - i))
-
-    @staticmethod
-    def bezier(t, nodes):
-        """Calculate coordinate of a point in the bezier curve"""
-        n = len(nodes) - 1
-        x = y = 0
-        for i, pos in enumerate(nodes):
-            bern = BezierCurve.bernstein(t, i, n)
-            x += pos[0] * bern
-            y += pos[1] * bern
-        return x, y
-
-    @staticmethod
-    def bezier_curve_range(n, nodes):
-        """Range of points in a curve bezier"""
-        for i in range(n):
-            t = i / float(n - 1)
-            yield BezierCurve.bezier(t, nodes)
-
     def setup_toolbar(self, parent):
         super().setup_toolbar(parent)
 
@@ -287,6 +258,31 @@ class BezierCurve(Curve):
     def de_casteljau(self, t):
         return tuple(self._de_casteljau(len(self.nodes) - 1, 0, t))
 
+    def horner(self, t):
+        n = len(self.nodes) - 1
+        nodes = np.array(self.nodes)
+
+        if t <= 0.5:
+            u = t / (1-t)
+
+            value = nodes[n]
+            for i in range(n-1, -1, -1):
+                value = value * u + nodes[i] * comb(n, i)
+
+            value *= (1-t)**n
+            return tuple(value)
+
+        u = (1 - t) / t
+
+        value = nodes[0]
+        for i in range(n-1, -1, -1):
+            value = value * u + nodes[n-i] * comb(n, n-i)
+
+        value *= t ** n
+        return tuple(value)
+
+
+
     def calculate_points(self, force=True, fast=False):
         super().calculate_points()
 
@@ -297,9 +293,9 @@ class BezierCurve(Curve):
         if fast:
             steps = max(20, self.resolution // 10)
 
-            points = [self.nodes[0]]
-            for point in BezierCurve.bezier_curve_range(steps, self.nodes):
-                points.append(point)
+            # Horner algorithm
+            points = [self.horner(t) for t in np.linspace(0, 1, steps)]
+            logger.info(str(points))
 
             self.points = points
             return self.points
@@ -308,11 +304,6 @@ class BezierCurve(Curve):
             self.helper_nodes = {}
 
         steps = self.resolution
-
-        # Basic Algorithm
-        # points = [self.nodes[0]]
-        # for point in BezierCurve.bezier_curve_range(steps, self.nodes):
-        #     points.append(point)
 
         # De Casteljau Algorithm
         points = [self.de_casteljau(i) for i in range(steps + 1)]

@@ -382,9 +382,9 @@ class Curve(object):
             return
 
         for i in range(len(points) - 1):
-            x, y = points[i]
-            next_x, next_y = points[i + 1]
-            qp.drawLine(x, y, next_x, next_y)
+            p1 = QtCore.QPointF(*points[i])
+            p2 = QtCore.QPointF(*points[i + 1])
+            qp.drawLine(p1, p2)
 
     def draw_points(self, qp: QtGui.QPainter):
         pen = QtGui.QPen(self.color, self.width, QtCore.Qt.SolidLine)
@@ -395,9 +395,9 @@ class Curve(object):
             return
 
         for i in range(len(points) - 1):
-            x, y = points[i]
-            next_x, next_y = points[i + 1]
-            qp.drawLine(x, y, next_x, next_y)
+            p1 = QtCore.QPointF(*points[i])
+            p2 = QtCore.QPointF(*points[i + 1])
+            qp.drawLine(p1, p2)
 
     def draw_nodes(self, qp: QtGui.QPainter):
         red_pen = QtGui.QPen(self.node_color, 1, QtCore.Qt.DashLine)

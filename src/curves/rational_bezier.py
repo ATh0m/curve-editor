@@ -78,6 +78,11 @@ class RationalBezierCurve(BezierCurve):
             self.calculate_points()
 
     @staticmethod
+    def bernstein(t, i, n):
+        """Bernstein polynom"""
+        return comb(n, i) * (t ** i) * ((1 - t) ** (n - i))
+
+    @staticmethod
     def rational_bezier(t, nodes, weights):
         """Calculate coordinate of a point in the bezier curve"""
         n = len(nodes) - 1

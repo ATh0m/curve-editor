@@ -88,11 +88,11 @@ class CubicSpline(Curve):
         ts = np.linspace(0, 1, n)
         ts0 = np.linspace(0, 1, steps)
 
-        xs_ = CS(ts, xs, bc_type='natural')(ts0)
-        ys_ = CS(ts, ys, bc_type='natural')(ts0)
+        # xs_ = CS(ts, xs, bc_type='natural')(ts0)
+        # ys_ = CS(ts, ys, bc_type='natural')(ts0)
 
-        # xs_ = CubicSpline.cubic_interp1d(ts0, ts, xs)
-        # ys_ = CubicSpline.cubic_interp1d(ts0, ts, ys)
+        xs_ = CubicSpline.cubic_interp1d(ts0, ts, xs)
+        ys_ = CubicSpline.cubic_interp1d(ts0, ts, ys)
         points = list(zip(xs_, ys_))
 
         self.points = points
