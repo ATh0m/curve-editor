@@ -120,23 +120,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         new_curve_button.setPopupMode(QtWidgets.QToolButton.InstantPopup)
         new_curve_menu = QtWidgets.QMenu(new_curve_button)
 
-        new_bezier_action = QtWidgets.QAction("New Bezier", self)
+        new_bezier_action = QtWidgets.QAction("Bezier", self)
         new_bezier_action.triggered.connect(self.new_bezier_action_triggered)
         new_curve_menu.addAction(new_bezier_action)
 
-        new_rational_bezier_action = QtWidgets.QAction("New Rational Bezier", self)
+        new_rational_bezier_action = QtWidgets.QAction("Rational Bezier", self)
         new_rational_bezier_action.triggered.connect(self.new_rational_bezier_action_triggered)
         new_curve_menu.addAction(new_rational_bezier_action)
 
-        new_polygonal_action = QtWidgets.QAction("New Polygonal", self)
+        new_polygonal_action = QtWidgets.QAction("Polygonal", self)
         new_polygonal_action.triggered.connect(self.new_polygonal_action_triggered)
         new_curve_menu.addAction(new_polygonal_action)
 
-        new_polynomial_action = QtWidgets.QAction("New Polynomial", self)
+        new_polynomial_action = QtWidgets.QAction("Interpolation Polynomial", self)
         new_polynomial_action.triggered.connect(self.new_polynomial_action_triggered)
         new_curve_menu.addAction(new_polynomial_action)
 
-        new_cubic_spline_action = QtWidgets.QAction("New Cubic Spline", self)
+        new_cubic_spline_action = QtWidgets.QAction("Cubic Spline", self)
         new_cubic_spline_action.triggered.connect(self.new_cubic_spline_action_triggered)
         new_curve_menu.addAction(new_cubic_spline_action)
 

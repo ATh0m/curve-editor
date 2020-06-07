@@ -120,26 +120,34 @@ class Curve(object):
         self.show_nodes_action.setCheckable(True)
         self.toolbar.addAction(self.show_nodes_action)
 
+        reorder_nodes_button = QtWidgets.QToolButton(parent)
+        reorder_nodes_button.setText("Reorder nodes ▶")
+        reorder_nodes_button.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+        reorder_nodes_menu = QtWidgets.QMenu(reorder_nodes_button)
+
         self.swap_nodes_action = QtWidgets.QAction("Swap nodes",
                                                    parent)
         self.swap_nodes_action.triggered.connect(
             self.swap_nodes_action_triggered)
         self.swap_nodes_action.setCheckable(True)
-        self.toolbar.addAction(self.swap_nodes_action)
+        reorder_nodes_menu.addAction(self.swap_nodes_action)
 
         self.insert_node_before_action = QtWidgets.QAction("Move node before",
                                                            parent)
         self.insert_node_before_action.triggered.connect(
             self.insert_node_before_action_triggered)
         self.insert_node_before_action.setCheckable(True)
-        self.toolbar.addAction(self.insert_node_before_action)
+        reorder_nodes_menu.addAction(self.insert_node_before_action)
 
         self.insert_node_after_action = QtWidgets.QAction("Move node after",
                                                           parent)
         self.insert_node_after_action.triggered.connect(
             self.insert_node_after_action_triggered)
         self.insert_node_after_action.setCheckable(True)
-        self.toolbar.addAction(self.insert_node_after_action)
+        reorder_nodes_menu.addAction(self.insert_node_after_action)
+
+        reorder_nodes_button.setMenu(reorder_nodes_menu)
+        self.toolbar.addWidget(reorder_nodes_button)
 
         self.visibility_action = QtWidgets.QAction("Show/hide", parent)
         self.visibility_action.triggered.connect(

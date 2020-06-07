@@ -306,6 +306,9 @@ class SplitCurveState(DefaultState):
             logger.info("Splitting curve")
             first_curve, second_curve = curve.split_curve(index)
 
+            first_curve.selected = False
+            second_curve.selected = False
+
             canvas.model.add(first_curve)
             canvas.model.add(second_curve)
 
