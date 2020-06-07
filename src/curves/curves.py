@@ -149,6 +149,12 @@ class Curve(object):
         reorder_nodes_button.setMenu(reorder_nodes_menu)
         self.toolbar.addWidget(reorder_nodes_button)
 
+        self.show_convex_hull_action = QtWidgets.QAction("Show convex hull", parent)
+        self.show_convex_hull_action.triggered.connect(
+            self.show_convex_hull_action_triggered)
+        self.show_convex_hull_action.setCheckable(True)
+        self.toolbar.addAction(self.show_convex_hull_action)
+
         self.visibility_action = QtWidgets.QAction("Show/hide", parent)
         self.visibility_action.triggered.connect(
             self.visibility_action_triggered)
@@ -243,6 +249,13 @@ class Curve(object):
         if state != self.hidden:
             self.hidden = state
             self.model.updated()
+
+    def show_convex_hull_action_triggered(self, state):
+        if self.show_convex_hull != state:
+            self.show_convex_hull = state
+            self.calculate_points(force=False)
+            self.model.updated()
+            logger.info(f'Convex hull: {state}')
 
     def rotate_action_triggered(self, state):
         theta, ok = QInputDialog().getDouble(self.model.parent,

@@ -66,12 +66,6 @@ class BezierCurve(Curve):
 
         self.extra_toolbar = QtWidgets.QToolBar()
 
-        self.show_convex_hull_action = QtWidgets.QAction("Show convex hull", parent)
-        self.show_convex_hull_action.triggered.connect(
-            self.show_convex_hull_action_triggered)
-        self.show_convex_hull_action.setCheckable(True)
-        self.extra_toolbar.addAction(self.show_convex_hull_action)
-
         self.split_curve_action = QtWidgets.QAction("Split curve", parent)
         self.split_curve_action.triggered.connect(self.split_curve_action_triggered)
         self.split_curve_action.setCheckable(True)
@@ -110,13 +104,6 @@ class BezierCurve(Curve):
 
         self.join_right_button.setMenu(join_right_menu)
         self.extra_toolbar.addWidget(self.join_right_button)
-
-    def show_convex_hull_action_triggered(self, state):
-        if self.show_convex_hull != state:
-            self.show_convex_hull = state
-            self.calculate_points(force=False)
-            self.model.updated()
-            logger.info(f'Convex hull: {state}')
 
     def split_curve_action_triggered(self, state):
         if state:

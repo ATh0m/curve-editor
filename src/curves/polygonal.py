@@ -8,5 +8,7 @@ class PolygonalCurve(Curve):
         self.type = "Polygonal Curve"
 
     def calculate_points(self, force=True, fast=False):
+        super().calculate_points()
+
         self.points = self.nodes
         return self.points
