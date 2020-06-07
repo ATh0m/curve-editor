@@ -34,6 +34,8 @@ class Curve(object):
 
         self.resolution = 500
 
+        self.highlight_color = QtGui.QColor(60, 202, 253, 20)
+
         self.model = model
 
         self.toolbar = None
@@ -54,6 +56,11 @@ class Curve(object):
 
     def move_node(self, index, x, y, calculate=True):
         self.nodes[index] = (x, y)
+        if calculate:
+            self.calculate_points()
+
+    def reverse_nodes(self, calculate=True):
+        self.nodes = self.nodes[::-1]
         if calculate:
             self.calculate_points()
 
@@ -110,6 +117,11 @@ class Curve(object):
             self.move_node_action_triggered)
         self.move_node_action.setCheckable(True)
         self.toolbar.addAction(self.move_node_action)
+
+        self.reverse_nodes_action = QtWidgets.QAction("Reverse nodes", parent)
+        self.reverse_nodes_action.triggered.connect(
+            self.reverse_nodes_action_triggered)
+        self.toolbar.addAction(self.reverse_nodes_action)
 
         self.show_nodes_action = QtWidgets.QAction("Show nodes",
                                                    parent)
@@ -219,6 +231,10 @@ class Curve(object):
             self.model.state = MoveNodeState(curve=self)
         else:
             self.model.state = DefaultState()
+
+    def reverse_nodes_action_triggered(self, state):
+        self.reverse_nodes()
+        self.model.updated()
 
     def show_nodes_action_triggered(self, state):
         if state != self.show_nodes:
@@ -410,9 +426,7 @@ class Curve(object):
         qp.drawLine(points[-1][0], points[-1][1], points[0][0], points[0][1])
 
     def draw_highlight(self, qp: QtGui.QPainter):
-        highlight_color = QtGui.QColor(60, 202, 253, 20)
-        highlight_pen = QtGui.QPen(highlight_color, self.width + 10, QtCore.Qt.SolidLine)
-
+        highlight_pen = QtGui.QPen(self.highlight_color, self.width + 10, QtCore.Qt.SolidLine)
         qp.setPen(highlight_pen)
 
         points = self.points
@@ -457,14 +471,14 @@ class Curve(object):
         if self.hidden or not self.nodes:
             return
 
-        if self.show_nodes:
-            logger.info("Drawing nodes")
-            self.draw_nodes(qp)
-
         if self.selected:
             self.draw_highlight(qp)
 
         self.draw_points(qp)
+
+        if self.show_nodes:
+            logger.info("Drawing nodes")
+            self.draw_nodes(qp)
 
         if self.show_convex_hull:
             logger.info("Drawing convex hull")

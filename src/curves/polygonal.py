@@ -7,6 +7,8 @@ class PolygonalCurve(Curve):
 
         self.type = "Polygonal Curve"
 
+        self.highlight_color.setAlpha(100)
+
     def calculate_points(self, force=True, fast=False):
         super().calculate_points()
 
