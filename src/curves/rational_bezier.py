@@ -1,15 +1,11 @@
-import math
+import logging
+
 import numpy as np
+from PyQt5 import QtGui, QtCore, QtWidgets
 from scipy.special import comb
 
-from PyQt5 import QtGui, QtCore, QtWidgets
-from PyQt5.QtWidgets import QInputDialog
-
+from src.states import DefaultState, SetWeightNodeState
 from . import BezierCurve
-
-from src.states import SplitCurveState, DefaultState, SetWeightNodeState
-
-import logging
 
 logger = logging.getLogger('curve-editor')
 
@@ -123,13 +119,13 @@ class RationalBezierCurve(BezierCurve):
 
         first_nodes, first_weights = [], []
         second_nodes, second_weights = [], []
-        for k in range(n+1):
+        for k in range(n + 1):
             w1, W1 = self._rational_de_casteljau(k, 0, index)
             w2, W2 = self._rational_de_casteljau(k, n - k, index)
-            
+
             first_nodes.append(tuple(W1))
             first_weights.append(w1)
-            
+
             second_nodes.append(tuple(W2))
             second_weights.append(w2)
 
@@ -167,7 +163,7 @@ class RationalBezierCurve(BezierCurve):
             qp.setPen(red_pen)
             qp.drawEllipse(QtCore.QPointF(point[0] - 3, point[1] - 3), node_size, node_size)
 
-            qp.drawText(point[0] + 5, point[1] - 3, f'{i+1} ({weights[i]: .2f})')
+            qp.drawText(point[0] + 5, point[1] - 3, f'{i + 1} ({weights[i]: .2f})')
             old_point = point
 
     def _rational_de_casteljau(self, i, k, t):
@@ -176,8 +172,8 @@ class RationalBezierCurve(BezierCurve):
                 self.helper_weights[(i, k, t)] = self.weights[k]
                 self.helper_nodes[(i, k, t)] = np.array(self.nodes[k])
             else:
-                w1, W1 = self._rational_de_casteljau(i-1, k, t)
-                w2, W2 = self._rational_de_casteljau(i-1, k+1, t)
+                w1, W1 = self._rational_de_casteljau(i - 1, k, t)
+                w2, W2 = self._rational_de_casteljau(i - 1, k + 1, t)
 
                 u = t / self.resolution
                 w = (1 - u) * w1 + u * w2

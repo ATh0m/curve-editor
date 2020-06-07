@@ -1,7 +1,6 @@
 import logging
 
 import numpy as np
-
 from PyQt5 import QtWidgets
 
 from .curves import Curve
@@ -15,7 +14,7 @@ class InterpolationPolynomialCurve(Curve):
 
         self.type = "Interpolation Polynomial Curve"
 
-        self.nodes_type = "chebyshev" # "equidistant"
+        self.nodes_type = "chebyshev"  # "equidistant"
 
     def chebyshev_type_action_triggered(self, state):
         if self.nodes_type != "chebyshev":
@@ -64,8 +63,8 @@ class InterpolationPolynomialCurve(Curve):
 
         if self.nodes_type == "equidistant":
             # Equidistant nodes
-            ts = np.linspace(0, 1, n+1)
-            omegas = [(-1)**i * n**n / (np.math.factorial(i) * np.math.factorial(n-i))
+            ts = np.linspace(0, 1, n + 1)
+            omegas = [(-1) ** i * n ** n / (np.math.factorial(i) * np.math.factorial(n - i))
                       for i in range(n + 1)]
         else:
             # Chebyshev nodes

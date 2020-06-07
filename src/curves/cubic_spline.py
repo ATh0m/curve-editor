@@ -1,7 +1,6 @@
 import logging
 
 import numpy as np
-from scipy.interpolate import CubicSpline as CS
 
 from .curves import Curve
 

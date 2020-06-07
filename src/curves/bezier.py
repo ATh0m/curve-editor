@@ -2,7 +2,6 @@ import logging
 
 logger = logging.getLogger('curve-editor')
 
-import math
 import numpy as np
 from scipy.special import comb
 
@@ -262,25 +261,23 @@ class BezierCurve(Curve):
         nodes = np.array(self.nodes)
 
         if t <= 0.5:
-            u = t / (1-t)
+            u = t / (1 - t)
 
             value = nodes[n]
-            for i in range(n-1, -1, -1):
+            for i in range(n - 1, -1, -1):
                 value = value * u + nodes[i] * comb(n, i)
 
-            value *= (1-t)**n
+            value *= (1 - t) ** n
             return tuple(value)
 
         u = (1 - t) / t
 
         value = nodes[0]
-        for i in range(n-1, -1, -1):
-            value = value * u + nodes[n-i] * comb(n, n-i)
+        for i in range(n - 1, -1, -1):
+            value = value * u + nodes[n - i] * comb(n, n - i)
 
         value *= t ** n
         return tuple(value)
-
-
 
     def calculate_points(self, force=True, fast=False):
         super().calculate_points()

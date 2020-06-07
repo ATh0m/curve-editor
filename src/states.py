@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QInputDialog
-
 import logging
+
+from PyQt5.QtWidgets import QInputDialog
 
 logger = logging.getLogger('curve-editor')
 

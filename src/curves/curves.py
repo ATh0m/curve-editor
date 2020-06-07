@@ -7,8 +7,6 @@ import copy
 from PyQt5 import QtGui, QtWidgets, QtCore
 from PyQt5.QtWidgets import QInputDialog, QColorDialog
 
-from scipy.spatial import ConvexHull
-
 from src.states import AddNodeState, DefaultState, RemoveNodeState, MoveNodeState, \
     ChangeNodesOrderState
 
