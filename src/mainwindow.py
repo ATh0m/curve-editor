@@ -24,6 +24,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionNew.triggered.connect(self.new)
         self.actionScreenshot.triggered.connect(self.screenshot)
 
+        self.actionToggleCurvesList.triggered.connect(self.toggle_curves_list)
+
         self.selected_curve = None
 
         self.model = CurvesModel(parent=self)
@@ -41,6 +43,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.model.updated()
         self.add_toolbar()
+
+        self.dockWidget.hide()
 
     def model_changed(self):
         logger.info('Update window')
@@ -186,6 +190,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.model.state = DuplicateCurveState(self)
         else:
             self.model.state = DefaultState()
+
+    def toggle_curves_list(self):
+        if self.dockWidget.isHidden():
+            self.dockWidget.show()
+        else:
+            self.dockWidget.hide()
 
     def screenshot(self):
         options = QtWidgets.QFileDialog.Options()
