@@ -48,12 +48,12 @@ class JoinRightSmoothState(DefaultState):
 
 
 class BezierCurve(Curve):
+    type = "Bezier Curve"
+
     def __init__(self, name, nodes=None):
         super().__init__(name, nodes)
 
         self.helper_nodes = {}
-
-        self.type = "Bezier Curve"
 
     def add_node(self, x, y, calculate=True):
         self.nodes.append((x, y))
@@ -262,20 +262,16 @@ class BezierCurve(Curve):
 
         if t <= 0.5:
             u = t / (1 - t)
-
             value = nodes[n]
             for i in range(n - 1, -1, -1):
                 value = value * u + nodes[i] * comb(n, i)
-
             value *= (1 - t) ** n
             return tuple(value)
 
         u = (1 - t) / t
-
         value = nodes[0]
         for i in range(n - 1, -1, -1):
             value = value * u + nodes[n - i] * comb(n, n - i)
-
         value *= t ** n
         return tuple(value)
 
@@ -291,8 +287,6 @@ class BezierCurve(Curve):
 
             # Horner algorithm
             points = [self.horner(t) for t in np.linspace(0, 1, steps)]
-            logger.info(str(points))
-
             self.points = points
             return self.points
 

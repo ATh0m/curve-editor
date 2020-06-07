@@ -2,6 +2,7 @@ import json
 
 from PyQt5.QtCore import QAbstractListModel, Qt
 
+import src.curves
 from .curves import Curve
 from .states import DefaultState
 
@@ -104,15 +105,21 @@ class CurvesModel(QAbstractListModel):
         with open(filename, 'r') as json_file:
             data = json.load(json_file)
 
-        curves = [Curve.from_dict(d) for d in data]
-        self.curves = curves
+        types = {cls.type: cls for cls in map(src.curves.__dict__.get, src.curves.__all__)}
+        curves = [types[d["type"]].from_dict(d) for d in data]
+
+        for curve in curves:
+            self.add(curve)
 
         self.updated()
 
     def new(self, update=True):
-        self.curves = []
+        self.__state = DefaultState()
         self.selected_curve = None
         self.selected_curve_index = None
+
+        del self.curves
+        self.curves = []
 
         if update:
             self.updated()

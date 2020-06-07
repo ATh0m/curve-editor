@@ -11,13 +11,14 @@ logger = logging.getLogger('curve-editor')
 
 
 class RationalBezierCurve(BezierCurve):
+    type = "Rational Bezier Curve"
+
     def __init__(self, name, nodes=None, weights=None):
         super().__init__(name, nodes)
 
         self.helper_weights = {}
 
         self.weights = weights or []
-        self.type = "Rational Bezier Curve"
 
     def add_node(self, x, y, calculate=True):
         self.nodes.append((x, y))
@@ -72,30 +73,6 @@ class RationalBezierCurve(BezierCurve):
 
         if calculate:
             self.calculate_points()
-
-    @staticmethod
-    def bernstein(t, i, n):
-        """Bernstein polynom"""
-        return comb(n, i) * (t ** i) * ((1 - t) ** (n - i))
-
-    @staticmethod
-    def rational_bezier(t, nodes, weights):
-        """Calculate coordinate of a point in the bezier curve"""
-        n = len(nodes) - 1
-
-        numerator = sum(RationalBezierCurve.bernstein(t, i, n) * weights[i] * node
-                        for i, node in enumerate(nodes))
-        denominator = sum(RationalBezierCurve.bernstein(t, i, n) * weights[i]
-                          for i, node in enumerate(nodes))
-
-        return numerator / denominator
-
-    @staticmethod
-    def rational_bezier_curve_range(n, nodes, weights):
-        """Range of points in a curve bezier"""
-        for i in range(n):
-            t = i / float(n - 1)
-            yield RationalBezierCurve.rational_bezier(t, nodes, weights)
 
     def setup_toolbar(self, parent):
         super().setup_toolbar(parent)
@@ -188,6 +165,28 @@ class RationalBezierCurve(BezierCurve):
         w, W = self._rational_de_casteljau(len(self.nodes) - 1, 0, t)
         return w, tuple(W)
 
+    def horner(self, t):
+        n = len(self.nodes) - 1
+        nodes = np.array(self.nodes)
+        weights = np.array(self.weights)
+
+        if t <= 0.5:
+            u = t / (1 - t)
+            numerator = weights[n] * nodes[n]
+            denominator = weights[n]
+            for i in range(n - 1, -1, -1):
+                numerator = numerator * u + weights[i] * nodes[i] * comb(n, i)
+                denominator = denominator * u + weights[i] * comb(n, i)
+            return tuple(numerator / denominator)
+
+        u = (1 - t) / t
+        numerator = weights[0] * nodes[0]
+        denominator = weights[0]
+        for i in range(n - 1, -1, -1):
+            numerator = numerator * u + weights[n-i] * nodes[n-i] * comb(n, n-i)
+            denominator = denominator * u + weights[n-i] * comb(n, n-i)
+        return tuple(numerator / denominator)
+
     def calculate_points(self, force=True, fast=False):
         super(BezierCurve, self).calculate_points()
 
@@ -200,10 +199,8 @@ class RationalBezierCurve(BezierCurve):
         if fast:
             steps = max(20, self.resolution // 10)
 
-            points = [nodes[0]]
-            for point in RationalBezierCurve.rational_bezier_curve_range(steps, nodes, weights):
-                points.append(point)
-
+            # Horner algorithm
+            points = [self.horner(t) for t in np.linspace(0, 1, steps)]
             self.points = points
             return self.points
 
@@ -218,3 +215,18 @@ class RationalBezierCurve(BezierCurve):
 
         self.points = points
         return self.points
+
+    def to_dict(self):
+        data = super().to_dict()
+
+        data["weights"] = self.weights
+        return data
+
+    @classmethod
+    def from_dict(cls, data, calculate=True):
+        curve = super().from_dict(data, calculate=False)
+        curve.weights = data["weights"]
+
+        if calculate:
+            curve.calculate_points()
+        return curve

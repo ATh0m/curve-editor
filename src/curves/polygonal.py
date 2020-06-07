@@ -2,10 +2,10 @@ from .curves import Curve
 
 
 class PolygonalCurve(Curve):
+    type = "Polygonal Curve"
+
     def __init__(self, name, nodes=None):
         super().__init__(name, nodes)
-
-        self.type = "Polygonal Curve"
 
         self.highlight_color.setAlpha(100)
 

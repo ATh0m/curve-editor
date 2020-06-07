@@ -12,13 +12,14 @@ from src.states import AddNodeState, DefaultState, RemoveNodeState, MoveNodeStat
 
 
 class Curve(object):
+    type = "Base Curve"
+
     def __init__(self, name, nodes=None, model=None):
         self.nodes = nodes or []
         self.points = []
         self.convex_hull = []
 
         self.name = name
-        self.type = "Base Curve"
 
         self.selected = False
         self.hidden = False
@@ -26,10 +27,10 @@ class Curve(object):
         self.show_nodes = False
         self.show_convex_hull = False
 
-        self.color = QtCore.Qt.blue
+        self.color = QtGui.QColor(0, 0, 255)
         self.width = 1.0
 
-        self.node_color = QtCore.Qt.red
+        self.node_color = QtGui.QColor(255, 0, 0)
         self.node_size = 3.0
 
         self.resolution = 500
@@ -465,7 +466,7 @@ class Curve(object):
         for i, point in enumerate(self.nodes[1:]):
             i += 2
             qp.drawEllipse(QtCore.QPointF(point[0] - 3, point[1] - 3), node_size, node_size)
-            qp.drawText(point[0] + 5, point[1] - 3, '%d' % i)
+            qp.drawText(point[0] + 5, point[1] - 3, f'{i}')
 
     def draw(self, qp: QtGui.QPainter):
         if self.hidden or not self.nodes:
@@ -531,18 +532,28 @@ class Curve(object):
         data = {
             "name": self.name,
             "type": self.type,
-            "color": self.color,
-            "nodes": self.nodes
+            "nodes": self.nodes,
+            "hidden": self.hidden,
+            "color": self.color.getRgb(),
+            "width": self.width,
+            "node_color": self.node_color.getRgb(),
+            "node_size": self.node_size,
+            "resolution": self.resolution
         }
         return data
 
     @classmethod
-    def from_dict(cls, data):
+    def from_dict(cls, data, calculate=True):
         nodes = data["nodes"] if "nodes" in data else []
         curve = cls(data["name"], nodes)
 
-        if "color" in data:
-            curve.color = data["color"]
+        curve.hidden = data["hidden"]
+        curve.color = QtGui.QColor.fromRgb(*data["color"])
+        curve.width = data["width"]
+        curve.node_color = QtGui.QColor.fromRgb(*data["node_color"])
+        curve.node_size = data["node_size"]
+        curve.resolution = data["resolution"]
 
-        curve.calculate_points()
+        if calculate:
+            curve.calculate_points()
         return curve

@@ -8,10 +8,7 @@ logger = logging.getLogger('curve-editor')
 
 
 class CubicSpline(Curve):
-    def __init__(self, name, nodes=None):
-        super().__init__(name, nodes)
-
-        self.type = "Cubic Spline"
+    type = "Cubic Spline"
 
     @staticmethod
     def cubic_interp1d(ts0, ts, xs):

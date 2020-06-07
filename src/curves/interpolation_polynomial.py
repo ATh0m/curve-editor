@@ -9,10 +9,10 @@ logger = logging.getLogger('curve-editor')
 
 
 class InterpolationPolynomialCurve(Curve):
+    type = "Interpolation Polynomial Curve"
+
     def __init__(self, name, nodes=None):
         super().__init__(name, nodes)
-
-        self.type = "Interpolation Polynomial Curve"
 
         self.nodes_type = "chebyshev"  # "equidistant"
 
@@ -87,3 +87,18 @@ class InterpolationPolynomialCurve(Curve):
 
         self.points = points
         return self.points
+
+    def to_dict(self):
+        data = super().to_dict()
+
+        data["nodes_type"] = self.nodes_type
+        return data
+
+    @classmethod
+    def from_dict(cls, data, calculate=True):
+        curve = super().from_dict(data, calculate=False)
+        curve.nodes_type = data["nodes_type"]
+
+        if calculate:
+            curve.calculate_points()
+        return curve
