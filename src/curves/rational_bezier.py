@@ -9,7 +9,6 @@ from . import BezierCurve
 
 from src.states import SplitCurveState, DefaultState, SetWeightNodeState
 
-import numpy as np
 import logging
 
 logger = logging.getLogger('curve-editor')

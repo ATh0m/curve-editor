@@ -14,6 +14,40 @@ from .curves import Curve
 from src.states import SplitCurveState, DefaultState
 
 
+class JoinRightSmoothState(DefaultState):
+    def __init__(self, curve, method):
+        super().__init__()
+        self.curve = curve
+        self.method = method
+
+        self.controller = self.curve.join_right_action_c1
+        if self.method == "G1":
+            self.controller = self.curve.join_right_action_g1
+
+    def enable(self):
+        if not self.controller.isChecked():
+            self.controller.trigger()
+
+    def disable(self):
+        self.controller.setChecked(False)
+
+    def mousePressEvent(self, event, canvas):
+        x, y = event.pos().x(), event.pos().y()
+        curve = self.curve
+
+        index, dist = canvas.model.distance_to_nearest_curve(x, y)
+
+        logger.info("Joining")
+
+        if dist is not None and dist < 10:
+            other = canvas.model.curves[index]
+            if isinstance(other, BezierCurve):
+                curve.join_right_smooth(other, c1=(self.method == "C1"))
+                canvas.model.updated()
+
+        canvas.model.state = self.next_state()
+
+
 class BezierCurve(Curve):
     def __init__(self, name, nodes=None):
         super().__init__(name, nodes)
@@ -80,6 +114,24 @@ class BezierCurve(Curve):
         self.drop_degree_action.triggered.connect(self.drop_degree_action_triggered)
         self.extra_toolbar.addAction(self.drop_degree_action)
 
+        join_right_button = QtWidgets.QToolButton(parent)
+        join_right_button.setText("Join right ▶")
+        join_right_button.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+        join_right_menu = QtWidgets.QMenu(join_right_button)
+
+        self.join_right_action_c1 = QtWidgets.QAction("C1", parent)
+        self.join_right_action_c1.triggered.connect(self.join_right_action_c1_triggered)
+        self.join_right_action_c1.setCheckable(True)
+        join_right_menu.addAction(self.join_right_action_c1)
+
+        self.join_right_action_g1 = QtWidgets.QAction("G1", parent)
+        self.join_right_action_g1.triggered.connect(self.join_right_action_g1_triggered)
+        self.join_right_action_g1.setCheckable(True)
+        join_right_menu.addAction(self.join_right_action_g1)
+
+        join_right_button.setMenu(join_right_menu)
+        self.extra_toolbar.addWidget(join_right_button)
+
     def show_convex_hull_action_triggered(self, state):
         if self.show_convex_hull != state:
             self.show_convex_hull = state
@@ -113,8 +165,29 @@ class BezierCurve(Curve):
 
         return first_curve, second_curve
 
-    def join_right(self, other):
-        pass
+    def dist(point_1: QtCore.QPointF, point_2: QtCore.QPointF) -> float:
+        return np.sqrt(
+            np.power(point_1.x() - point_2.x(), 2) + np.power(point_1.y() - point_2.y(), 2)
+        )
+
+    def vector_length(vector: QtCore.QPointF) -> float:
+        return np.sqrt(np.power(vector.x(), 2) + np.power(vector.y(), 2))
+
+    def join_right_smooth(self, other, c1=True):
+        nodes1 = np.array(self.nodes)
+        nodes2 = np.array(other.nodes)
+
+        dx, dy = nodes1[-1] - nodes2[0]
+        other.translate(dx, dy, calculate=False)
+        nodes2 = np.array(other.nodes)
+
+        if len(nodes1) > 2 and len(nodes2) > 2:
+            join_vec = nodes1[-1] - nodes1[-2]
+            if not c1:
+                join_vec *= np.linalg.norm(nodes2[0] - nodes2[1]) / np.linalg.norm(join_vec)
+            other.nodes[1] = tuple(nodes2[0] + join_vec)
+
+        other.calculate_points(force=True)
 
     def drop_degree_first_method(self, m=1):
         n = len(self.nodes) - 1
@@ -175,6 +248,18 @@ class BezierCurve(Curve):
             logger.info(f"Degree raising: +{degree}")
             self.raise_degree(degree)
             self.model.updated()
+
+    def join_right_action_c1_triggered(self, state):
+        if state:
+            self.model.state = JoinRightSmoothState(self, "C1")
+        else:
+            self.model.state = DefaultState()
+
+    def join_right_action_g1_triggered(self, state):
+        if state:
+            self.model.state = JoinRightSmoothState(self, "G1")
+        else:
+            self.model.state = DefaultState()
 
     def __approximate_length(self):
         if len(self.nodes) < 2:
