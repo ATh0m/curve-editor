@@ -81,9 +81,17 @@ class BezierCurve(Curve):
         self.raise_degree_action.triggered.connect(self.raise_degree_action_triggered)
         self.extra_toolbar.addAction(self.raise_degree_action)
 
-        self.drop_degree_action = QtWidgets.QAction("Drop degree", parent)
-        self.drop_degree_action.triggered.connect(self.drop_degree_action_triggered)
-        self.extra_toolbar.addAction(self.drop_degree_action)
+        self.drop_degree_button = QtWidgets.QToolButton(parent)
+        self.drop_degree_button.setText("Drop degree ▶")
+        self.drop_degree_button.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+        drop_degree_menu = QtWidgets.QMenu(self.drop_degree_button)
+
+        self.drop_degree_first_action = QtWidgets.QAction("First method", parent)
+        self.drop_degree_first_action.triggered.connect(self.drop_degree_first_action_triggered)
+        drop_degree_menu.addAction(self.drop_degree_first_action)
+
+        self.drop_degree_button.setMenu(drop_degree_menu)
+        self.extra_toolbar.addWidget(self.drop_degree_button)
 
         self.join_right_button = QtWidgets.QToolButton(parent)
         self.join_right_button.setText("Join right ▶")
@@ -160,17 +168,17 @@ class BezierCurve(Curve):
 
         other.calculate_points(force=True)
 
-    def drop_degree_first_method(self, m=1):
+    def _drop_degree_first_method(self):
         n = len(self.nodes) - 1
         nodes = np.array(self.nodes)
 
         ws1 = [nodes[0]]
-        for k in range(1, n//2 + 1):
-            w1 = (1 + k / (n-k)) * nodes[k] - k / (n-k) * ws1[k-1]
+        for k in range(1, n // 2 + 1):
+            w1 = (1 + k / (n - k)) * nodes[k] - k / (n - k) * ws1[k - 1]
             ws1.append(w1)
 
         ws2 = [nodes[-1]]
-        for k in range(n, n//2, -1):
+        for k in range(n, n // 2, -1):
             w2 = n / k * nodes[k] + (1 - n / k) * ws2[-1]
             ws2.append(w2)
 
@@ -178,18 +186,22 @@ class BezierCurve(Curve):
         new_nodes = list(map(tuple, new_nodes))
 
         self.nodes = new_nodes
+
+    def drop_degree_first_method(self, m=1):
+        for i in range(m):
+            self._drop_degree_first_method()
         self.calculate_points()
 
-    def drop_degree_action_triggered(self, state):
+    def drop_degree_first_action_triggered(self, state):
         degree, ok = QInputDialog().getInt(self.model.parent,
-                                           "Drop degree",
+                                           "Drop degree (first method)",
                                            "Drop by:",
-                                           value=0,
-                                           min=0,
+                                           value=1,
+                                           min=1,
                                            max=100,
                                            step=1)
         if ok and degree > 0:
-            logger.info(f"Degree dropping: +{degree}")
+            logger.info(f"Degree dropping (first method): +{degree}")
             self.drop_degree_first_method(degree)
             self.model.updated()
 
@@ -211,8 +223,8 @@ class BezierCurve(Curve):
         degree, ok = QInputDialog().getInt(self.model.parent,
                                            "Raise degree",
                                            "Raise by:",
-                                           value=0,
-                                           min=0,
+                                           value=1,
+                                           min=1,
                                            max=100,
                                            step=1)
         if ok and degree > 0:
