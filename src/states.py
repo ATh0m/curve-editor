@@ -30,6 +30,19 @@ class DefaultState(State):
 
 
 class SelectCurveState(DefaultState):
+    def __init__(self, parent):
+        super().__init__()
+
+        self.parent = parent
+        self.controller = parent.select_action
+
+    def enable(self):
+        if not self.controller.isChecked():
+            self.controller.trigger()
+
+    def disable(self):
+        self.controller.setChecked(False)
+
     def mousePressEvent(self, event, canvas):
         x, y = event.pos().x(), event.pos().y()
 
@@ -47,6 +60,19 @@ class SelectCurveState(DefaultState):
 
 
 class RemoveCurveState(DefaultState):
+    def __init__(self, parent):
+        super().__init__()
+
+        self.parent = parent
+        self.controller = parent.remove_curve_action
+
+    def enable(self):
+        if not self.controller.isChecked():
+            self.controller.trigger()
+
+    def disable(self):
+        self.controller.setChecked(False)
+
     def mousePressEvent(self, event, canvas):
         x, y = event.pos().x(), event.pos().y()
 
@@ -62,11 +88,21 @@ class RemoveCurveState(DefaultState):
 
 
 class MoveCurveState(DefaultState):
-    def __init__(self):
+    def __init__(self, parent):
         super().__init__()
 
         self.curve = None
         self.last_position = None
+
+        self.parent = parent
+        self.controller = parent.move_curve_action
+
+    def enable(self):
+        if not self.controller.isChecked():
+            self.controller.trigger()
+
+    def disable(self):
+        self.controller.setChecked(False)
 
     def mousePressEvent(self, event, canvas):
         x, y = event.pos().x(), event.pos().y()
@@ -225,6 +261,19 @@ class ChangeNodesOrderState(DefaultState):
 
 
 class DuplicateCurveState(DefaultState):
+    def __init__(self, parent):
+        super().__init__()
+
+        self.parent = parent
+        self.controller = parent.duplicate_curve_action
+
+    def enable(self):
+        if not self.controller.isChecked():
+            self.controller.trigger()
+
+    def disable(self):
+        self.controller.setChecked(False)
+
     def mousePressEvent(self, event, canvas):
         x, y = event.pos().x(), event.pos().y()
 

@@ -114,10 +114,10 @@ class BezierCurve(Curve):
         self.drop_degree_action.triggered.connect(self.drop_degree_action_triggered)
         self.extra_toolbar.addAction(self.drop_degree_action)
 
-        join_right_button = QtWidgets.QToolButton(parent)
-        join_right_button.setText("Join right ▶")
-        join_right_button.setPopupMode(QtWidgets.QToolButton.InstantPopup)
-        join_right_menu = QtWidgets.QMenu(join_right_button)
+        self.join_right_button = QtWidgets.QToolButton(parent)
+        self.join_right_button.setText("Join right ▶")
+        self.join_right_button.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+        join_right_menu = QtWidgets.QMenu(self.join_right_button)
 
         self.join_right_action_c1 = QtWidgets.QAction("C1", parent)
         self.join_right_action_c1.triggered.connect(self.join_right_action_c1_triggered)
@@ -129,8 +129,8 @@ class BezierCurve(Curve):
         self.join_right_action_g1.setCheckable(True)
         join_right_menu.addAction(self.join_right_action_g1)
 
-        join_right_button.setMenu(join_right_menu)
-        self.extra_toolbar.addWidget(join_right_button)
+        self.join_right_button.setMenu(join_right_menu)
+        self.extra_toolbar.addWidget(self.join_right_button)
 
     def show_convex_hull_action_triggered(self, state):
         if self.show_convex_hull != state:

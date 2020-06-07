@@ -363,6 +363,21 @@ class Curve(object):
 
         qp.drawLine(points[-1][0], points[-1][1], points[0][0], points[0][1])
 
+    def draw_highlight(self, qp: QtGui.QPainter):
+        highlight_color = QtGui.QColor(60, 202, 253, 20)
+        highlight_pen = QtGui.QPen(highlight_color, self.width + 10, QtCore.Qt.SolidLine)
+
+        qp.setPen(highlight_pen)
+
+        points = self.points
+        if len(points) < 2:
+            return
+
+        for i in range(len(points) - 1):
+            x, y = points[i]
+            next_x, next_y = points[i + 1]
+            qp.drawLine(x, y, next_x, next_y)
+
     def draw_points(self, qp: QtGui.QPainter):
         pen = QtGui.QPen(self.color, self.width, QtCore.Qt.SolidLine)
         qp.setPen(pen)
@@ -374,7 +389,6 @@ class Curve(object):
         for i in range(len(points) - 1):
             x, y = points[i]
             next_x, next_y = points[i + 1]
-
             qp.drawLine(x, y, next_x, next_y)
 
     def draw_nodes(self, qp: QtGui.QPainter):
@@ -400,6 +414,9 @@ class Curve(object):
         if self.show_nodes:
             logger.info("Drawing nodes")
             self.draw_nodes(qp)
+
+        if self.selected:
+            self.draw_highlight(qp)
 
         self.draw_points(qp)
 

@@ -105,6 +105,7 @@ class RationalBezierCurve(BezierCurve):
         self.extra_toolbar.addAction(self.set_weight_action)
 
         self.raise_degree_action.setDisabled(True)
+        self.join_right_button.setDisabled(True)
 
     def set_weight_action_triggered(self, state):
         if state:

@@ -9,7 +9,7 @@ from .canvas import Canvas
 from .curves import BezierCurve, PolygonalCurve, InterpolationPolynomialCurve, RationalBezierCurve, CubicSpline
 from .model import CurvesModel
 
-from .states import SelectCurveState, RemoveCurveState, MoveCurveState, DuplicateCurveState
+from .states import SelectCurveState, RemoveCurveState, MoveCurveState, DuplicateCurveState, DefaultState
 
 from .ui.MainWindow import Ui_MainWindow
 
@@ -104,8 +104,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         curve.show_nodes_action.trigger()
 
     def select_curve_action_triggered(self, state):
-        logger.info("select curve mode")
-        self.model.state = SelectCurveState()
+        if state:
+            logger.info("select curve mode")
+            self.model.state = SelectCurveState(self)
+        else:
+            self.model.state = DefaultState()
 
     def add_toolbar(self):
         new_curve_button = QtWidgets.QToolButton(self)
@@ -114,48 +117,47 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         new_curve_menu = QtWidgets.QMenu(new_curve_button)
 
         new_bezier_action = QtWidgets.QAction("New Bezier", self)
-        # button_action.setStatusTip("This is your button")
         new_bezier_action.triggered.connect(self.new_bezier_action_triggered)
         new_curve_menu.addAction(new_bezier_action)
 
         new_rational_bezier_action = QtWidgets.QAction("New Rational Bezier", self)
-        # button_action.setStatusTip("This is your button")
         new_rational_bezier_action.triggered.connect(self.new_rational_bezier_action_triggered)
         new_curve_menu.addAction(new_rational_bezier_action)
 
         new_polygonal_action = QtWidgets.QAction("New Polygonal", self)
-        # button_action.setStatusTip("This is your button")
         new_polygonal_action.triggered.connect(self.new_polygonal_action_triggered)
         new_curve_menu.addAction(new_polygonal_action)
 
         new_polynomial_action = QtWidgets.QAction("New Polynomial", self)
-        # button_action.setStatusTip("This is your button")
         new_polynomial_action.triggered.connect(self.new_polynomial_action_triggered)
         new_curve_menu.addAction(new_polynomial_action)
 
         new_cubic_spline_action = QtWidgets.QAction("New Cubic Spline", self)
-        # button_action.setStatusTip("This is your button")
         new_cubic_spline_action.triggered.connect(self.new_cubic_spline_action_triggered)
         new_curve_menu.addAction(new_cubic_spline_action)
 
         new_curve_button.setMenu(new_curve_menu)
         self.toolBar.addWidget(new_curve_button)
 
-        select_action = QtWidgets.QAction("Select curve", self)
-        select_action.triggered.connect(self.select_curve_action_triggered)
-        self.toolBar.addAction(select_action)
+        self.select_action = QtWidgets.QAction("Select curve", self)
+        self.select_action.triggered.connect(self.select_curve_action_triggered)
+        self.select_action.setCheckable(True)
+        self.toolBar.addAction(self.select_action)
 
-        remove_curve_action = QtWidgets.QAction("Remove curve", self)
-        remove_curve_action.triggered.connect(self.remove_curve_action_triggered)
-        self.toolBar.addAction(remove_curve_action)
+        self.remove_curve_action = QtWidgets.QAction("Remove curve", self)
+        self.remove_curve_action.triggered.connect(self.remove_curve_action_triggered)
+        self.remove_curve_action.setCheckable(True)
+        self.toolBar.addAction(self.remove_curve_action)
 
-        move_curve_action = QtWidgets.QAction("Move curve", self)
-        move_curve_action.triggered.connect(self.move_curve_action_triggered)
-        self.toolBar.addAction(move_curve_action)
+        self.move_curve_action = QtWidgets.QAction("Move curve", self)
+        self.move_curve_action.triggered.connect(self.move_curve_action_triggered)
+        self.move_curve_action.setCheckable(True)
+        self.toolBar.addAction(self.move_curve_action)
 
-        duplicate_curve_action = QtWidgets.QAction("Duplicate curve", self)
-        duplicate_curve_action.triggered.connect(self.duplicate_curve_action_triggered)
-        self.toolBar.addAction(duplicate_curve_action)
+        self.duplicate_curve_action = QtWidgets.QAction("Duplicate curve", self)
+        self.duplicate_curve_action.triggered.connect(self.duplicate_curve_action_triggered)
+        self.duplicate_curve_action.setCheckable(True)
+        self.toolBar.addAction(self.duplicate_curve_action)
 
         # self.addToolBarBreak()
 
@@ -166,15 +168,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.model.select(index)
 
     def remove_curve_action_triggered(self, state):
-        logger.info("remove curve mode")
-        self.model.state = RemoveCurveState()
+        if state:
+            logger.info("remove curve mode")
+            self.model.state = RemoveCurveState(self)
+        else:
+            self.model.state = DefaultState()
 
     def move_curve_action_triggered(self, state):
-        logger.info("move curve mode")
-        self.model.state = MoveCurveState()
+        if state:
+            logger.info("move curve mode")
+            self.model.state = MoveCurveState(self)
+        else:
+            self.model.state = DefaultState()
 
     def duplicate_curve_action_triggered(self, state):
-        self.model.state = DuplicateCurveState()
+        if state:
+            self.model.state = DuplicateCurveState(self)
+        else:
+            self.model.state = DefaultState()
 
     def screenshot(self):
         options = QtWidgets.QFileDialog.Options()
