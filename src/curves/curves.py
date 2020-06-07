@@ -249,7 +249,7 @@ class Curve(object):
                                              "Rotate curve",
                                              "Degrees:",
                                              value=0.0,
-                                             min=0.0,
+                                             min=-360.0,
                                              max=360.0)
         if ok:
             logger.info(f"Rotate curve: {theta}")
@@ -329,10 +329,37 @@ class Curve(object):
             self.calculate_points()
             self.model.updated()
 
+    @staticmethod
+    def convex_hull(points):
+        # https://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain#Python
+        points = sorted(set(points))
+
+        if len(points) <= 1:
+            return points
+
+        def cross(o, a, b):
+            return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+
+        lower = []
+        for p in points:
+            while len(lower) >= 2 and cross(lower[-2], lower[-1], p) <= 0:
+                lower.pop()
+            lower.append(p)
+
+        upper = []
+        for p in reversed(points):
+            while len(upper) >= 2 and cross(upper[-2], upper[-1], p) <= 0:
+                upper.pop()
+            upper.append(p)
+
+        return lower[:-1] + upper[:-1]
+
     def calculate_convex_hull(self):
         if len(self.nodes) >= 3:
-            hull = ConvexHull(self.nodes)
-            self.convex_hull = [self.nodes[i] for i in hull.vertices]
+            # hull = ConvexHull(self.nodes)
+            # self.convex_hull = [self.nodes[i] for i in hull.vertices]
+
+            self.convex_hull = Curve.convex_hull(self.nodes)
         else:
             self.convex_hull = []
 
