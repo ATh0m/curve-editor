@@ -54,6 +54,12 @@ Celem projektu jest napisanie edytora krzywych
 - [x] [+0.15] eksport rysowanej scenki do pliku
 - [x] [+0.15] import rysowanej scenki z pliku
 
+### Uruchomienie
+```bash
+pip install -r requirements.txt
+python curve-editor.py 
+```
+
 ### Materiały
 * [Sci-Hub | Algorithms for rational Bézier curves. Computer-Aided Design, 15(2), 73–77 | 10.1016/0010-4485(83)90171-9](https://sci-hub.tw/https://doi.org/10.1016/0010-4485(83)90171-9)
 * [NURBS for Curve & Surface Design: From Projective Geometry to Practical Use - Gerald Farin - Google Ksi±żki](https://books.google.pl/books?id=v8O2DwAAQBAJ&pg=PA116&lpg=PA116&dq=rational+bezier+curve+raise+degree&source=bl&ots=jfdSqv7f8u&sig=ACfU3U2so4_uTsIJuARoafssKKoQsKo2sg&hl=pl&sa=X&ved=2ahUKEwiS88ar9_DpAhVmxIsKHeNCC5UQ6AEwC3oECAkQAQ#v=onepage&q=rational%20bezier%20curve%20raise%20degree&f=false)
