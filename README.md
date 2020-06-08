@@ -32,22 +32,22 @@ Celem projektu jest napisanie edytora krzywych
 ###### Ocenę podwyższamy poprzez realizację następujących zadań:
 
 - [ ] [+0.3] dodanie obowiązkowych algorytmów również dla wymiernych krzywych Béziera
-	- [ ] zaimplementowany jest schemat Hornera i algorytm De Casteljau
-	- [ ] zaimplementowane jest podnoszenie stopnia krzywej Béziera
+	- [x] zaimplementowany jest schemat Hornera i algorytm De Casteljau
+	- [x] zaimplementowane jest podnoszenie stopnia krzywej Béziera
 	- [ ] zaimplementowana jest jedna metoda obniżania stopnia krzywej Béziera
-	- [ ] zaimplementowany jest podział krzywej Béziera w zadanym punkcie
+	- [x] zaimplementowany jest podział krzywej Béziera w zadanym punkcie
 	- [ ] zaimplementowany jest jeden rodzaj łączenia krzywych Béziera (typu C1 lub G1)
 - [x] [+0.15] operacje na krzywych: skaluj_przesuń_obróć
 - [ ] [+0.2] zaimplementowanie okresowych funkcji sklejanych 3 stopnia (OIFS3)
-- [ ] [+0.2] pokazywanie (na życzenie) otoczki wypukłej punktów kontrolnych danej krzywej
-- [ ] [+0.2] łączenie krzywych Béziera typu G1 i C1 (czyli rozszerzenie ostatniego punktu części na 3.0)
+- [x] [+0.2] pokazywanie (na życzenie) otoczki wypukłej punktów kontrolnych danej krzywej
+- [x] [+0.2] łączenie krzywych Béziera typu G1 i C1 (czyli rozszerzenie ostatniego punktu części na 3.0)
 - [ ] [+0.2] zaimplementowanie drugiej techniki obniżania stopnia krzywej Béziera
 - [ ] [+0.3] zaimplementowanie trzeciej techniki obniżania stopnia krzywej Béziera
-- [ ] [+0.05] zmiana koloru krzywej
-- [ ] [+0.05] zmiana grubości krzywej
-- [ ] [+0.05] funkcja pokaż_ukryj krzywą_punkty kontrolne
-- [ ] [+0.05] zmiana koloru/wielkości punktów kontrolnych
-- [ ] [+0.15] odwróć kolejność punktów kontrolnych danej krzywej
-- [ ] [+0.1] eksport rysowanej scenki do obrazka
-- [ ] [+0.15] eksport rysowanej scenki do pliku
-- [ ] [+0.15] import rysowanej scenki z pliku
+- [x] [+0.05] zmiana koloru krzywej
+- [x] [+0.05] zmiana grubości krzywej
+- [x] [+0.05] funkcja pokaż_ukryj krzywą_punkty kontrolne
+- [x] [+0.05] zmiana koloru/wielkości punktów kontrolnych
+- [x] [+0.15] odwróć kolejność punktów kontrolnych danej krzywej
+- [x] [+0.1] eksport rysowanej scenki do obrazka
+- [x] [+0.15] eksport rysowanej scenki do pliku
+- [x] [+0.15] import rysowanej scenki z pliku

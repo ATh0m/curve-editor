@@ -82,7 +82,7 @@ class RationalBezierCurve(BezierCurve):
         self.set_weight_action.setCheckable(True)
         self.extra_toolbar.addAction(self.set_weight_action)
 
-        self.raise_degree_action.setDisabled(True)
+        # self.raise_degree_action.setDisabled(True)
         self.join_right_button.setDisabled(True)
 
     def set_weight_action_triggered(self, state):
@@ -186,6 +186,33 @@ class RationalBezierCurve(BezierCurve):
             numerator = numerator * u + weights[n-i] * nodes[n-i] * comb(n, n-i)
             denominator = denominator * u + weights[n-i] * comb(n, n-i)
         return tuple(numerator / denominator)
+
+    def _raise_degree(self):
+        n = len(self.nodes) - 1
+        nodes = np.array(self.nodes)
+        weights = np.array(self.weights)
+
+        new_nodes = [nodes[0]]
+        new_weights = [(n+1) * weights[0]]
+
+        for i in range(1, n+1):
+            weight = i * weights[i-1] + (n+1 - i) * weights[i]
+            new_weights.append(weight)
+
+            node = i * weights[i-1] * nodes[i-1] + (n+1 - i) * weights[i] * nodes[i]
+            node /= weight
+            new_nodes.append(node)
+
+        new_nodes.append(nodes[-1])
+        new_weights.append((n+1) * weights[-1])
+
+        self.nodes = [tuple(n) for n in new_nodes]
+        self.weights = new_weights
+
+    def raise_degree(self, m):
+        for _ in range(m):
+            self._raise_degree()
+        self.calculate_points()
 
     def calculate_points(self, force=True, fast=False):
         super(BezierCurve, self).calculate_points()
