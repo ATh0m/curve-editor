@@ -40,7 +40,7 @@ class JoinRightSmoothState(DefaultState):
 
         if dist is not None and dist < 10:
             other = canvas.model.curves[index]
-            if isinstance(other, BezierCurve):
+            if type(curve) is type(other):
                 curve.join_right_smooth(other, c1=(self.method == "C1"))
                 canvas.model.updated()
 

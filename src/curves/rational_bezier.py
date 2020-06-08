@@ -82,14 +82,19 @@ class RationalBezierCurve(BezierCurve):
         self.set_weight_action.setCheckable(True)
         self.extra_toolbar.addAction(self.set_weight_action)
 
-        # self.raise_degree_action.setDisabled(True)
-        self.join_right_button.setDisabled(True)
+        self.join_right_action_g1.setDisabled(True)
 
     def set_weight_action_triggered(self, state):
         if state:
             self.model.state = SetWeightNodeState(self)
         else:
             self.model.state = DefaultState()
+
+    def reverse_nodes(self, calculate=True):
+        super().reverse_nodes(calculate=False)
+        self.weights = self.weights[::-1]
+        if calculate:
+            self.calculate_points()
 
     def split_curve(self, index):
         n = len(self.nodes) - 1
@@ -186,6 +191,25 @@ class RationalBezierCurve(BezierCurve):
             numerator = numerator * u + weights[n-i] * nodes[n-i] * comb(n, n-i)
             denominator = denominator * u + weights[n-i] * comb(n, n-i)
         return tuple(numerator / denominator)
+
+    def join_right_smooth(self, other, c1=True):
+        nodes1 = np.array(self.nodes)
+        nodes2 = np.array(other.nodes)
+
+        dx, dy = nodes1[-1] - nodes2[0]
+        other.translate(dx, dy, calculate=False)
+        other.weights[0] = self.weights[-1]
+
+        nodes2 = np.array(other.nodes)
+        weights1 = np.array(self.weights)
+        weights2 = np.array(other.weights)
+
+        if len(nodes1) > 2 and len(nodes2) > 2:
+            join_vec = nodes1[-1] - nodes1[-2]
+            other.nodes[1] = tuple(nodes2[0] + join_vec)
+            other.weights[1] = 2 * weights1[-1] - weights1[-2]
+
+        other.calculate_points(force=True)
 
     def _drop_degree_first_method(self):
         n = len(self.nodes) - 2

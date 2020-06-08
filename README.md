@@ -3,6 +3,8 @@
 
 Celem projektu jest napisanie edytora krzywych
 
+![](screenshots/screenshot.png)
+
 ## Wymagania
 ###### Na ocenę 3.0 (realizacja tych funkcji daje [+3] do wyniku) konieczne jest przedstawienie projektu, w którym możliwe są:
 
@@ -31,12 +33,12 @@ Celem projektu jest napisanie edytora krzywych
 
 ###### Ocenę podwyższamy poprzez realizację następujących zadań:
 
-- [ ] [+0.3] dodanie obowiązkowych algorytmów również dla wymiernych krzywych Béziera
+- [x] [+0.3] dodanie obowiązkowych algorytmów również dla wymiernych krzywych Béziera
 	- [x] zaimplementowany jest schemat Hornera i algorytm De Casteljau
 	- [x] zaimplementowane jest podnoszenie stopnia krzywej Béziera
 	- [x] zaimplementowana jest jedna metoda obniżania stopnia krzywej Béziera
 	- [x] zaimplementowany jest podział krzywej Béziera w zadanym punkcie
-	- [ ] zaimplementowany jest jeden rodzaj łączenia krzywych Béziera (typu C1 lub G1)
+	- [x] zaimplementowany jest jeden rodzaj łączenia krzywych Béziera (typu C1 lub G1)
 - [x] [+0.15] operacje na krzywych: skaluj_przesuń_obróć
 - [ ] [+0.2] zaimplementowanie okresowych funkcji sklejanych 3 stopnia (OIFS3)
 - [x] [+0.2] pokazywanie (na życzenie) otoczki wypukłej punktów kontrolnych danej krzywej
@@ -51,3 +53,9 @@ Celem projektu jest napisanie edytora krzywych
 - [x] [+0.1] eksport rysowanej scenki do obrazka
 - [x] [+0.15] eksport rysowanej scenki do pliku
 - [x] [+0.15] import rysowanej scenki z pliku
+
+### Materiały
+* [Sci-Hub | Algorithms for rational Bézier curves. Computer-Aided Design, 15(2), 73–77 | 10.1016/0010-4485(83)90171-9](https://sci-hub.tw/https://doi.org/10.1016/0010-4485(83)90171-9)
+* [NURBS for Curve & Surface Design: From Projective Geometry to Practical Use - Gerald Farin - Google Ksi±żki](https://books.google.pl/books?id=v8O2DwAAQBAJ&pg=PA116&lpg=PA116&dq=rational+bezier+curve+raise+degree&source=bl&ots=jfdSqv7f8u&sig=ACfU3U2so4_uTsIJuARoafssKKoQsKo2sg&hl=pl&sa=X&ved=2ahUKEwiS88ar9_DpAhVmxIsKHeNCC5UQ6AEwC3oECAkQAQ#v=onepage&q=rational%20bezier%20curve%20raise%20degree&f=false)
+* [Sci-Hub | Least squares degree reduction of Bézier curves. Computer-Aided Design, 27(11), 845–851 | 10.1016/0010-4485(95)00008-9](https://sci-hub.tw/https://doi.org/10.1016/0010-4485(95)00008-9)
+* [A Primer on Bézier Curves](https://pomax.github.io/bezierinfo/)
