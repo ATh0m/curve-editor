@@ -83,6 +83,8 @@ class InterpolationPolynomialCurve(Curve):
             return numerator / denominator
 
         steps = self.resolution
+        if fast:
+            steps = max(20, self.resolution // 10)
         points = [tuple(p(t)) for t in np.linspace(ts[0], ts[-1], steps)]
 
         self.points = points
