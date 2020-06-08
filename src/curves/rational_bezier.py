@@ -188,8 +188,8 @@ class RationalBezierCurve(BezierCurve):
         numerator = weights[0] * nodes[0]
         denominator = weights[0]
         for i in range(n - 1, -1, -1):
-            numerator = numerator * u + weights[n-i] * nodes[n-i] * comb(n, n-i)
-            denominator = denominator * u + weights[n-i] * comb(n, n-i)
+            numerator = numerator * u + weights[n - i] * nodes[n - i] * comb(n, n - i)
+            denominator = denominator * u + weights[n - i] * comb(n, n - i)
         return tuple(numerator / denominator)
 
     def join_right_smooth(self, other, c1=True):
@@ -218,21 +218,21 @@ class RationalBezierCurve(BezierCurve):
 
         vs1 = [nodes[0]]
         ws1 = [weights[0]]
-        for i in range(1, (n+1) // 2 + 1):
-            w1 = (n+1)/(n+1-i) * weights[i] - i/(n+1-i) * ws1[i-1]
+        for i in range(1, (n + 1) // 2 + 1):
+            w1 = (n + 1) / (n + 1 - i) * weights[i] - i / (n + 1 - i) * ws1[i - 1]
             ws1.append(w1)
 
-            v1 = (n+1)/(n+1-i) * weights[i] / ws1[i] * nodes[i] \
-                 - i/(n+1-i) * ws1[i-1] / ws1[i] * vs1[-1]
+            v1 = (n + 1) / (n + 1 - i) * weights[i] / ws1[i] * nodes[i] \
+                 - i / (n + 1 - i) * ws1[i - 1] / ws1[i] * vs1[-1]
             vs1.append(v1)
 
         vs2 = [nodes[-1]]
         ws2 = [weights[-1]]
-        for i in range((n+1), (n+1) // 2, -1):
-            w2 = (n+1)/i * weights[i] - (n+1-i)/i * ws2[-1]
+        for i in range((n + 1), (n + 1) // 2, -1):
+            w2 = (n + 1) / i * weights[i] - (n + 1 - i) / i * ws2[-1]
 
-            v2 = (n+1)/i * weights[i] / w2 * nodes[i] \
-                 - (n+1-i)/i * ws2[-1] / w2 * vs2[-1]
+            v2 = (n + 1) / i * weights[i] / w2 * nodes[i] \
+                 - (n + 1 - i) / i * ws2[-1] / w2 * vs2[-1]
 
             ws2.append(w2)
             vs2.append(v2)
@@ -249,18 +249,18 @@ class RationalBezierCurve(BezierCurve):
         weights = np.array(self.weights)
 
         new_nodes = [nodes[0]]
-        new_weights = [(n+1) * weights[0]]
+        new_weights = [(n + 1) * weights[0]]
 
-        for i in range(1, n+1):
-            weight = i * weights[i-1] + (n+1 - i) * weights[i]
+        for i in range(1, n + 1):
+            weight = i * weights[i - 1] + (n + 1 - i) * weights[i]
             new_weights.append(weight)
 
-            node = i * weights[i-1] * nodes[i-1] + (n+1 - i) * weights[i] * nodes[i]
+            node = i * weights[i - 1] * nodes[i - 1] + (n + 1 - i) * weights[i] * nodes[i]
             node /= weight
             new_nodes.append(node)
 
         new_nodes.append(nodes[-1])
-        new_weights.append((n+1) * weights[-1])
+        new_weights.append((n + 1) * weights[-1])
 
         self.nodes = [tuple(n) for n in new_nodes]
         self.weights = new_weights

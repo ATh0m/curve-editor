@@ -1,4 +1,5 @@
 import logging
+
 logger = logging.getLogger('curve-editor')
 logger.setLevel(logging.DEBUG)
 
@@ -15,7 +16,6 @@ fh.setFormatter(formatter)
 
 logger.addHandler(ch)
 logger.addHandler(fh)
-
 
 import sys
 from PyQt5 import QtWidgets
