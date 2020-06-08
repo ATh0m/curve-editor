@@ -34,7 +34,7 @@ Celem projektu jest napisanie edytora krzywych
 - [ ] [+0.3] dodanie obowiązkowych algorytmów również dla wymiernych krzywych Béziera
 	- [x] zaimplementowany jest schemat Hornera i algorytm De Casteljau
 	- [x] zaimplementowane jest podnoszenie stopnia krzywej Béziera
-	- [ ] zaimplementowana jest jedna metoda obniżania stopnia krzywej Béziera
+	- [x] zaimplementowana jest jedna metoda obniżania stopnia krzywej Béziera
 	- [x] zaimplementowany jest podział krzywej Béziera w zadanym punkcie
 	- [ ] zaimplementowany jest jeden rodzaj łączenia krzywych Béziera (typu C1 lub G1)
 - [x] [+0.15] operacje na krzywych: skaluj_przesuń_obróć

@@ -187,6 +187,38 @@ class RationalBezierCurve(BezierCurve):
             denominator = denominator * u + weights[n-i] * comb(n, n-i)
         return tuple(numerator / denominator)
 
+    def _drop_degree_first_method(self):
+        n = len(self.nodes) - 2
+        nodes = np.array(self.nodes)
+        weights = np.array(self.weights)
+
+        vs1 = [nodes[0]]
+        ws1 = [weights[0]]
+        for i in range(1, (n+1) // 2 + 1):
+            w1 = (n+1)/(n+1-i) * weights[i] - i/(n+1-i) * ws1[i-1]
+            ws1.append(w1)
+
+            v1 = (n+1)/(n+1-i) * weights[i] / ws1[i] * nodes[i] \
+                 - i/(n+1-i) * ws1[i-1] / ws1[i] * vs1[-1]
+            vs1.append(v1)
+
+        vs2 = [nodes[-1]]
+        ws2 = [weights[-1]]
+        for i in range((n+1), (n+1) // 2, -1):
+            w2 = (n+1)/i * weights[i] - (n+1-i)/i * ws2[-1]
+
+            v2 = (n+1)/i * weights[i] / w2 * nodes[i] \
+                 - (n+1-i)/i * ws2[-1] / w2 * vs2[-1]
+
+            ws2.append(w2)
+            vs2.append(v2)
+
+        new_nodes = vs1[:-1] + [(vs1[-1] + vs2[-1]) / 2] + vs2[1:-1][::-1]
+        self.nodes = list(map(tuple, new_nodes))
+
+        new_weights = ws1[:-1] + [(ws1[-1] + ws2[-1]) / 2] + ws2[1:-1][::-1]
+        self.weights = new_weights
+
     def _raise_degree(self):
         n = len(self.nodes) - 1
         nodes = np.array(self.nodes)
